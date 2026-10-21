@@ -51,14 +51,14 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 4: Modul Master Data (Barang, Pemasok, Pelanggan)
-- [ ] **4.1. Modul Barang & Stok**
+- [x] **4.1. Modul Barang & Stok**
   - Pencarian, filter, penanda stok menipis (BR-01).
   - Hak ubah non-harga untuk Gudang; Hak tambah & harga jual untuk Manajer; Kartu mutasi stok (BR-11).
   - Form penyesuaian stok fisik (alasan min. 10 karakter).
-- [ ] **4.2. Modul Pelanggan & Batas Kredit**
+- [x] **4.2. Modul Pelanggan & Batas Kredit**
   - CRUD pelanggan, batas kredit awal Rp0, termin bayar (0, 7, 14, 30 hari).
   - Hak ubah batas kredit khusus Manajer (BR-05).
-- [ ] **4.3. Modul Pemasok**
+- [x] **4.3. Modul Pemasok**
   - Manajemen data 4 pemasok aktif.
 
 ---
