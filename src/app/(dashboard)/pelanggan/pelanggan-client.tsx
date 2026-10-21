@@ -75,8 +75,8 @@ export function PelangganClientView({
     nama_toko: "",
     telepon: "",
     alamat: "",
-    termin_hari: "14",
-    batas_kredit: "0",
+    termin_hari: "",
+    batas_kredit: "",
   });
   const [submittingAdd, setSubmittingAdd] = useState(false);
 
@@ -121,8 +121,8 @@ export function PelangganClientView({
       nama_toko: "",
       telepon: "",
       alamat: "",
-      termin_hari: "14",
-      batas_kredit: "0",
+      termin_hari: "",
+      batas_kredit: "",
     });
     setIsAddOpen(true);
   };
@@ -131,8 +131,13 @@ export function PelangganClientView({
   const handleAddPelanggan = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (addForm.termin_hari === "") {
+      toast.error("Silakan pilih termin pembayaran terlebih dahulu.");
+      return;
+    }
+
     // Aturan BR-05: Pelanggan baru yang dibuat Staf Penjualan otomatis batas kredit Rp0
-    const batasKredit = isManajer ? Number(addForm.batas_kredit) : 0;
+    const batasKredit = isManajer ? (addForm.batas_kredit ? Number(addForm.batas_kredit) : 0) : 0;
     const termin = Number(addForm.termin_hari);
 
     setSubmittingAdd(true);
@@ -465,10 +470,12 @@ export function PelangganClientView({
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-900">Termin Bayar (Hari) *</label>
                 <select
+                  required
                   value={addForm.termin_hari}
                   onChange={(e) => setAddForm({ ...addForm, termin_hari: e.target.value })}
                   className="w-full h-9 rounded-md border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer"
                 >
+                  <option value="" disabled>-- Silakan Pilih Termin --</option>
                   <option value="0" className="text-slate-900 font-medium py-1">0 Hari (Tunai / COD)</option>
                   <option value="7" className="text-slate-900 font-medium py-1">7 Hari</option>
                   <option value="14" className="text-slate-900 font-medium py-1">14 Hari</option>
@@ -485,9 +492,10 @@ export function PelangganClientView({
                     type="number"
                     required
                     min="0"
-                    placeholder="10000000"
+                    placeholder="Contoh: 10000000"
                     value={addForm.batas_kredit}
                     onChange={(e) => setAddForm({ ...addForm, batas_kredit: e.target.value })}
+                    className="font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                   />
                 </div>
               ) : (

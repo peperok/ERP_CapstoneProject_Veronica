@@ -76,9 +76,9 @@ export function BarangClientView({
   const [addForm, setAddForm] = useState({
     kode: "",
     nama: "",
-    satuan: "dus",
+    satuan: "",
     harga_jual: "",
-    stok_minimum: "10",
+    stok_minimum: "",
   });
   const [submittingAdd, setSubmittingAdd] = useState(false);
 
@@ -132,9 +132,9 @@ export function BarangClientView({
     setAddForm({
       kode: getNextKodeBarang(),
       nama: "",
-      satuan: "dus",
+      satuan: "",
       harga_jual: "",
-      stok_minimum: "10",
+      stok_minimum: "",
     });
     setIsAddOpen(true);
   };
@@ -627,9 +627,10 @@ export function BarangClientView({
                   type="number"
                   required
                   min="0"
-                  placeholder="10"
+                  placeholder="Contoh: 10"
                   value={addForm.stok_minimum}
                   onChange={(e) => setAddForm({ ...addForm, stok_minimum: e.target.value })}
+                  className="font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
             </div>
