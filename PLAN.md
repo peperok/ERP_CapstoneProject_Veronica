@@ -24,15 +24,15 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 2: Database Schema & Keamanan Database (Supabase / PostgreSQL)
-- [ ] **2.1. DDL Schema Tables**
+- [x] **2.1. DDL Schema Tables**
   - Tabel: `profiles`, `pemasok`, `pelanggan`, `barang`, `pembelian`, `pesanan_jual`, `item_pesanan_jual`, `mutasi_stok`, `audit_log`.
-- [ ] **2.2. Row Level Security (RLS) & Kolom Rahasia**
+- [x] **2.2. Row Level Security (RLS) & Kolom Rahasia**
   - Proteksi kolom harga pokok/margin agar tidak bocor ke Staf Penjualan / Staf Gudang (BR-12).
-- [ ] **2.3. PostgreSQL Functions / Triggers Transaksional**
+- [x] **2.3. PostgreSQL Functions / Triggers Transaksional**
   - RPC konfirmasi pesanan dengan `FOR UPDATE` untuk mencegah stok minus pada konkurensi (BR-06).
   - Validasi limit kredit dan jatuh tempo (BR-05).
   - Trigger pencatatan mutasi stok dan audit log (BR-11, BR-12).
-- [ ] **2.4. Seeding Data Contoh**
+- [x] **2.4. Seeding Data Contoh**
   - Impor data dari `Data_Contoh_ERP.xlsx` (16 barang, 4 pemasok, 10 pelanggan, data transaksi 1 Sept - 14 Okt 2026).
 
 ---
