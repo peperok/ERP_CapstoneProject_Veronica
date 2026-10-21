@@ -38,12 +38,12 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 3: Autentikasi, Role Guard & Layout Dashboard
-- [ ] **3.1. Halaman Login & Autentikasi Supabase**
+- [x] **3.1. Halaman Login & Autentikasi Supabase**
   - Login dengan email & kata sandi akun uji.
   - Penolakan akun nonaktif (Agus Salim) (BR non-fungsional).
-- [ ] **3.2. Middleware & Role-Based Route Guard**
+- [x] **3.2. Middleware & Role-Based Route Guard**
   - Proteksi rute halaman via Next.js Middleware dan database role check.
-- [ ] **3.3. Dashboard Berbasis Peran**
+- [x] **3.3. Dashboard Berbasis Peran**
   - Tampilan khusus Manajer (Omzet, margin, piutang, barang menipis, grafik mingguan).
   - Tampilan khusus Staf Penjualan (Pesanan saya, tagihan jatuh tempo).
   - Tampilan khusus Staf Gudang (Pesanan siap kirim, stok menipis, PO menunggu barang).
