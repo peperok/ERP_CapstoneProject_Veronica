@@ -645,13 +645,14 @@ export function BarangClientView({
                 size="sm"
                 onClick={() => setIsAddOpen(false)}
                 disabled={submittingAdd}
+                className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
                 disabled={submittingAdd}
               >
                 {submittingAdd ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Barang"}
@@ -755,13 +756,14 @@ export function BarangClientView({
                 size="sm"
                 onClick={() => setIsEditOpen(false)}
                 disabled={submittingEdit}
+                className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
                 disabled={submittingEdit}
               >
                 {submittingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Perubahan"}

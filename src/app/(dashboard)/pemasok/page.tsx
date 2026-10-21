@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { PemasokClientView } from "./pemasok-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function PemasokPage() {
   const supabase = await createClient();
 

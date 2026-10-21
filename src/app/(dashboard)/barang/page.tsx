@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { BarangClientView } from "./barang-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function BarangPage() {
   const supabase = await createClient();
 
