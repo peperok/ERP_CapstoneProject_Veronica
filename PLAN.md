@@ -1,4 +1,5 @@
 # Rencana Kerja Bertahap (Implementation Plan)
+
 ## Aplikasi ERP Distribusi CV Sinar Abadi Niaga
 
 Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunjuk teknis, PRD, dan standar penilaian. Setiap tahap dikerjakan secara modular dan bertahap dengan status checklist yang diperbarui.
@@ -6,6 +7,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 1: Inisialisasi Proyek, Pondasi Frontend & Dokumentasi Acuan
+
 - [x] **1.1. Inisialisasi Next.js (App Router, TypeScript, Tailwind CSS)**
   - Inisialisasi proyek Next.js di direktori workspace dengan konfigurasi TypeScript, ESLint, dan Tailwind CSS.
   - Setup dependensi esensial (`lucide-react`, `clsx`, `tailwind-merge`, `class-variance-authority`, `@supabase/ssr`, `@supabase/supabase-js`, `sonner`).
@@ -24,6 +26,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 2: Database Schema & Keamanan Database (Supabase / PostgreSQL)
+
 - [x] **2.1. DDL Schema Tables**
   - Tabel: `profiles`, `pemasok`, `pelanggan`, `barang`, `pembelian`, `pesanan_jual`, `item_pesanan_jual`, `mutasi_stok`, `audit_log`.
 - [x] **2.2. Row Level Security (RLS) & Kolom Rahasia**
@@ -38,6 +41,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 3: Autentikasi, Role Guard & Layout Dashboard
+
 - [x] **3.1. Halaman Login & Autentikasi Supabase**
   - Login dengan email & kata sandi akun uji.
   - Penolakan akun nonaktif (Agus Salim) (BR non-fungsional).
@@ -51,6 +55,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 4: Modul Master Data (Barang, Pemasok, Pelanggan)
+
 - [x] **4.1. Modul Barang & Stok**
   - Pencarian, filter, penanda stok menipis (BR-01).
   - Hak ubah non-harga untuk Gudang; Hak tambah & harga jual untuk Manajer; Kartu mutasi stok (BR-11).
@@ -64,16 +69,18 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 5: Modul Pembelian (Purchase Order)
-- [ ] **5.1. Pengajuan Pembelian**
+
+- [x] **5.1. Pengajuan Pembelian**
   - Form pengajuan barang ke pemasok (1 s/d 10.000) oleh Gudang/Manajer (BR-09).
-- [ ] **5.2. Persetujuan & Penolakan oleh Manajer**
+- [x] **5.2. Persetujuan & Penolakan oleh Manajer**
   - Form approval (isi harga beli satuan > 0) atau tolak (alasan min. 10 karakter) (BR-09).
-- [ ] **5.3. Penerimaan Barang**
+- [x] **5.3. Penerimaan Barang**
   - Pencatatan barang tiba (1 s/d jumlah dipesan), penyesuaian HPP, penolakan penerimaan kedua (BR-10).
 
 ---
 
 ### Tahap 6: Modul Pesanan Jual (Sales Order) & Alur Transaksi
+
 - [ ] **6.1. Pembuatan Draf Pesanan**
   - Form dinamis multi-baris (1-20 baris), validasi diskon per baris (Sales max 10%, Manajer max 25%) (BR-02, BR-03).
 - [ ] **6.2. Konfirmasi Pesanan**
@@ -88,6 +95,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 7: Modul Laporan, Audit Log & Fitur Nilai Tambah
+
 - [ ] **7.1. Laporan Manajer**
   - Grafik omzet & margin 8 minggu terakhir, tabel top margin barang, tabel aging piutang, ekspor CSV.
 - [ ] **7.2. Audit Log Sistem**
@@ -99,6 +107,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 ---
 
 ### Tahap 8: Pengujian (20 Test Case), Polish & Deployment ke Netlify
+
 - [ ] **8.1. Eksekusi 20 Test Case Aturan Bisnis**
   - Verifikasi seluruh skenario pengujian di `docs/test-plan.md`.
 - [ ] **8.2. Audit Keamanan & SEO**
