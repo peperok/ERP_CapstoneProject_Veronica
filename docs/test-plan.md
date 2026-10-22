@@ -10,11 +10,11 @@ Seluruh akun uji terdaftar di database Supabase Auth dengan kata sandi spesifik 
 
 | No | Peran | Nama Pengguna | Email | Kata Sandi | Status Akun | Hak Akses Utama |
 |---|---|---|---|---|---|---|
-| 1 | **Manajer** | Hendra Wijaya | `hendra@sinarabadi.test` | `hendramanajer1` | Aktif | Akses penuh: Tambah barang, ubah harga jual, input HPP/harga beli, persetujuan/penolakan PO, pembatalan pesanan terkonfirmasi, pelunasan, laporan margin/laba, audit log |
-| 2 | **Staf Penjualan** | Rina Kartika | `rina@sinarabadi.test` | `rinastafjual1` | Aktif | Pelanggan, buat pesanan draf, diskon maks 10%, konfirmasi draf milik sendiri, pantau stok & harga jual |
-| 3 | **Staf Penjualan** | Dimas Prasetyo | `dimas@sinarabadi.test` | `dimasstafjual2` | Aktif | Sama dengan Rina Kartika (digunakan untuk pengujian transaksi bersamaan / race condition) |
-| 4 | **Staf Gudang** | Joko Susanto | `joko@sinarabadi.test` | `jokogudang1` | Aktif | Pemasok, data barang (selain harga), ajukan PO, terima barang PO, kirim pesanan (status dikirim), penyesuaian stok opname |
-| 5 | **Staf Penjualan (Nonaktif)** | Agus Salim | `agus@sinarabadi.test` | `agustafjualnon3` | Nonaktif | Akun nonaktif: Sistem harus menolak login dan akses API |
+| 1 | **Manajer** | Hendra Wijaya | `hendra@sinarabadi.test` | `Latihan#2026` | Aktif | Akses penuh: Tambah barang, ubah harga jual, input HPP/harga beli, persetujuan/penolakan PO, pembatalan pesanan terkonfirmasi, pelunasan, laporan margin/laba, audit log |
+| 2 | **Staf Penjualan** | Rina Kartika | `rina@sinarabadi.test` | `Latihan#2026` | Aktif | Pelanggan, buat pesanan draf, diskon maks 10%, konfirmasi draf milik sendiri, pantau stok & harga jual |
+| 3 | **Staf Penjualan** | Dimas Prasetyo | `dimas@sinarabadi.test` | `Latihan#2026` | Aktif | Sama dengan Rina Kartika (digunakan untuk pengujian transaksi bersamaan / race condition) |
+| 4 | **Staf Gudang** | Joko Susanto | `joko@sinarabadi.test` | `Latihan#2026` | Aktif | Pemasok, data barang (selain harga), ajukan PO, terima barang PO, kirim pesanan (status dikirim), penyesuaian stok opname |
+| 5 | **Staf Penjualan (Nonaktif)** | Agus Salim | `agus@sinarabadi.test` | `Latihan#2026` | Nonaktif | Akun nonaktif: Sistem harus menolak login dan akses API |
 
 ---
 

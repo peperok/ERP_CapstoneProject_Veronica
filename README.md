@@ -41,11 +41,11 @@ Aplikasi ini adalah **sistem internal** (tanpa registrasi mandiri publik). Masin
 
 | Peran | Nama | Email | Kata Sandi | Status | Hak Akses Utama |
 |---|---|---|---|---|---|
-| **Manajer** | Hendra Wijaya | `hendra@sinarabadi.test` | `hendramanajer1` | Aktif | Akses seluruh fitur; tambah barang; ubah harga jual; approve/reject PO; input HPP; batalkan SO terkonfirmasi (alasan min. 10 karakter); pelunasan tagihan; laporan laba/margin; audit log; kelola akun pengguna. |
-| **Staf Penjualan** | Rina Kartika | `rina@sinarabadi.test` | `rinastafjual1` | Aktif | Input pelanggan; buat draf pesanan jual; beri diskon maks 10%; konfirmasi draf milik sendiri; pantau stok & harga jual. *(HPP & margin disembunyikan)*. |
-| **Staf Penjualan** | Dimas Prasetyo | `dimas@sinarabadi.test` | `dimasstafjual2` | Aktif | Sama dengan Rina Kartika (disediakan untuk menguji transaksi pemesanan bersamaan/konkurensi). |
-| **Staf Gudang** | Joko Susanto | `joko@sinarabadi.test` | `jokogudang1` | Aktif | Edit data barang selain harga; kelola data pemasok; ajukan pembelian; catat penerimaan barang PO; ubah pesanan menjadi dikirim; catat penyesuaian stok opname fisik. |
-| **Nonaktif (Uji)** | Agus Salim | `agus@sinarabadi.test` | `agustafjualnon3` | Nonaktif | Akun nonaktif: Sistem harus menolak upaya login dan memblokir akses rute. |
+| **Manajer** | Hendra Wijaya | `hendra@sinarabadi.test` | `Latihan#2026` | Aktif | Akses seluruh fitur; tambah barang; ubah harga jual; approve/reject PO; input HPP; batalkan SO terkonfirmasi (alasan min. 10 karakter); pelunasan tagihan; laporan laba/margin; audit log; kelola akun pengguna. |
+| **Staf Penjualan** | Rina Kartika | `rina@sinarabadi.test` | `Latihan#2026` | Aktif | Input pelanggan; buat draf pesanan jual; beri diskon maks 10%; konfirmasi draf milik sendiri; pantau stok & harga jual. *(HPP & margin disembunyikan)*. |
+| **Staf Penjualan** | Dimas Prasetyo | `dimas@sinarabadi.test` | `Latihan#2026` | Aktif | Sama dengan Rina Kartika (disediakan untuk menguji transaksi pemesanan bersamaan/konkurensi). |
+| **Staf Gudang** | Joko Susanto | `joko@sinarabadi.test` | `Latihan#2026` | Aktif | Edit data barang selain harga; kelola data pemasok; ajukan pembelian; catat penerimaan barang PO; ubah pesanan menjadi dikirim; catat penyesuaian stok opname fisik. |
+| **Nonaktif (Uji)** | Agus Salim | `agus@sinarabadi.test` | `Latihan#2026` | Nonaktif | Akun nonaktif: Sistem harus menolak upaya login dan memblokir akses rute. |
 
 ---
 
