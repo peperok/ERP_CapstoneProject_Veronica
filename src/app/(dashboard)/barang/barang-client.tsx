@@ -32,6 +32,8 @@ import {
   SlidersHorizontal,
   CheckCircle2,
   Loader2,
+  Mail,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -101,6 +103,43 @@ export function BarangClientView({
     alasan: "",
   });
   const [submittingOpname, setSubmittingOpname] = useState(false);
+
+  // Dialog & State Notifikasi Email Resend (Fitur Nilai Tambah #1)
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const [targetEmail, setTargetEmail] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
+  const lowStockItems = barangList.filter((b) => Number(b.stok) <= Number(b.stok_minimum));
+
+  const handleSendLowStockEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSendingEmail(true);
+
+    try {
+      const res = await fetch("/api/notify-low-stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetEmail: targetEmail.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "Gagal mengirim email notifikasi.");
+        setIsSendingEmail(false);
+        return;
+      }
+
+      toast.success(data.message || "Email notifikasi stok menipis berhasil dikirim!");
+      setIsNotifyOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || "Terjadi kesalahan saat memproses email.");
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
 
   // Filter Data
   const filteredBarang = barangList.filter((b) => {
@@ -415,6 +454,21 @@ export function BarangClientView({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Tombol Alert Email via Resend (Fitur Nilai Tambah #1) */}
+          <Button
+            size="sm"
+            onClick={() => setIsNotifyOpen(true)}
+            className="text-xs h-9 font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-xs"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Kirim Alert Email Stok</span>
+            {lowStockItems.length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
+                {lowStockItems.length}
+              </span>
+            )}
+          </Button>
+
           <Button
             variant={filterMenipis ? "destructive" : "outline"}
             size="sm"
@@ -847,6 +901,111 @@ export function BarangClientView({
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Simpan Penyesuaian Stok"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL NOTIFIKASI EMAIL RESEND (FITUR NILAI TAMBAH #1)                     */}
+      {/* ========================================================================= */}
+      <Dialog open={isNotifyOpen} onOpenChange={setIsNotifyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <Mail className="w-5 h-5 text-blue-600" />
+              Kirim Alert Email Stok Menipis
+            </DialogTitle>
+            <DialogDescription>
+              Kirim laporan darurat persediaan barang yang telah mencapai atau di bawah batas minimum (Reorder Point) via <strong>Resend API</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSendLowStockEmail} className="space-y-4 py-2">
+            {/* Status Jumlah Barang Kritis */}
+            <div className={`p-3.5 rounded-xl border text-xs ${
+              lowStockItems.length > 0 
+                ? "bg-red-50 border-red-200 text-red-900" 
+                : "bg-emerald-50 border-emerald-200 text-emerald-900"
+            }`}>
+              <div className="flex items-center gap-2 font-bold">
+                {lowStockItems.length > 0 ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                    <span>Terdeteksi {lowStockItems.length} produk di bawah batas stok minimum!</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Seluruh stok barang saat ini aman (di atas batas minimum).</span>
+                  </>
+                )}
+              </div>
+              {lowStockItems.length > 0 && (
+                <div className="mt-2 space-y-1 pl-6">
+                  {lowStockItems.slice(0, 5).map((item) => (
+                    <div key={item.id} className="text-[11px] flex justify-between">
+                      <span className="font-medium">{item.nama}:</span>
+                      <span className="font-bold text-red-700">
+                        {item.stok} / min. {item.stok_minimum} {item.satuan}
+                      </span>
+                    </div>
+                  ))}
+                  {lowStockItems.length > 5 && (
+                    <p className="text-[10px] text-slate-500 italic mt-1">
+                      ...dan {lowStockItems.length - 5} produk lainnya.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Input Alamat Email Tujuan */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-900">
+                Alamat Email Penerima
+              </label>
+              <Input
+                type="email"
+                placeholder="Contoh: veronica@gmail.com (Email akun Resend Anda)"
+                value={targetEmail}
+                onChange={(e) => setTargetEmail(e.target.value)}
+                className="text-xs h-9"
+              />
+              <p className="text-[11px] text-slate-500">
+                *Catatan akun gratis Resend: Masukkan alamat email yang Anda gunakan saat mendaftar di Resend.com.
+              </p>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsNotifyOpen(false)}
+                disabled={isSendingEmail}
+                className="border-slate-300 text-slate-700 font-bold"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSendingEmail || lowStockItems.length === 0}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
+              >
+                {isSendingEmail ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Mengirim via Resend...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Kirim Email Alert</span>
+                  </>
                 )}
               </Button>
             </DialogFooter>

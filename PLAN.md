@@ -100,9 +100,9 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
   - Grafik omzet & margin 8 minggu terakhir, tabel top margin barang, tabel aging piutang, modal ekspor multi-sheet Excel (.xlsx), PDF resmi A4, & CSV.
 - [x] **7.2. Audit Log Sistem**
   - Daftar riwayat perubahan data sensitif dengan filter aksi, badge peran, format waktu WIB, dan modal JSON diff before/after values (BR-12).
-- [ ] **7.3. Fitur Nilai Tambah**
+- [x] **7.3. Fitur Nilai Tambah**
   - [x] Cetak surat jalan pengemudi (Delivery Order tanpa harga, tabel verifikasi fisik & 3 blok tanda tangan: Gudang, Sopir, Toko - BR-12).
-  - [ ] Notifikasi email stok menipis via Resend API (alert button di master barang).
+  - [x] Notifikasi email stok menipis via Resend API (alert button di master barang, email HTML responsif, rincian defisit stok).
 
 ---
 
