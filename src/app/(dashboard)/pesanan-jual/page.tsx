@@ -37,7 +37,7 @@ export default async function PesananJualPage() {
       jatuh_tempo,
       dilunasi_pada,
       alasan_batal,
-      pelanggan:pelanggan_id (id, kode, nama_toko, termin_hari, batas_kredit),
+      pelanggan:pelanggan_id (id, kode, nama_toko, telepon, alamat, termin_hari, batas_kredit),
       pembuat:dibuat_oleh (id, nama_lengkap),
       items:item_pesanan_jual (
         id,

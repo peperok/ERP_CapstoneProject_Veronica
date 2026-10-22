@@ -38,6 +38,7 @@ import {
   AlertCircle,
   Loader2,
   ShieldAlert,
+  Printer,
 } from "lucide-react";
 
 export interface ItemPesanan {
@@ -71,6 +72,8 @@ export interface PesananItem {
     id: string;
     kode: string;
     nama_toko: string;
+    telepon?: string;
+    alamat?: string;
     termin_hari: number;
     batas_kredit: number;
   };
@@ -381,6 +384,267 @@ export function PesananClientView({
     }
   };
 
+  const handlePrintSuratJalan = (order: PesananItem) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Gagal membuka jendela cetak. Pastikan pop-up diizinkan.");
+      return;
+    }
+
+    const tanggalFormatted = order.dikirim_pada
+      ? formatDate(order.dikirim_pada)
+      : formatDate(order.dibuat_pada);
+
+    const itemsHtml = (order.items || [])
+      .map(
+        (item, idx) => `
+      <tr>
+        <td style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${idx + 1}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: bold; color: #1e293b;">${item.barang?.kode || "-"}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 600; color: #0f172a;">${item.barang?.nama || "-"}</td>
+        <td style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; font-weight: 800; font-size: 13px; color: #0f172a;">${item.jumlah}</td>
+        <td style="text-align: center; padding: 8px; border: 1px solid #cbd5e1; color: #475569;">${item.barang?.satuan || "PCS"}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #64748b; font-size: 11px; text-align: center;">[ &nbsp; ] Sesuai &amp; Baik</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    const printHtml = `
+      <!DOCTYPE html>
+      <html lang="id">
+        <head>
+          <meta charset="utf-8">
+          <title>Surat Jalan - ${order.nomor}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 15mm 15mm 15mm 15mm;
+            }
+            * {
+              box-sizing: border-box;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+            body {
+              color: #0f172a;
+              background: #ffffff;
+              margin: 0;
+              padding: 10px;
+              font-size: 12px;
+              line-height: 1.4;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 2px solid #0f172a;
+              padding-bottom: 12px;
+              margin-bottom: 15px;
+            }
+            .company-title {
+              font-size: 18px;
+              font-weight: 900;
+              color: #1e3a8a;
+              letter-spacing: 0.5px;
+            }
+            .company-sub {
+              font-size: 11px;
+              color: #475569;
+              margin-top: 2px;
+            }
+            .doc-badge {
+              text-align: right;
+            }
+            .doc-title {
+              font-size: 16px;
+              font-weight: 900;
+              color: #0f172a;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .doc-no {
+              font-size: 12px;
+              font-weight: bold;
+              color: #2563eb;
+              margin-top: 2px;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              margin-bottom: 18px;
+              padding: 10px 14px;
+              background: #f8fafc;
+              border-radius: 6px;
+              border: 1px solid #e2e8f0;
+            }
+            .info-block p {
+              margin: 3px 0;
+              font-size: 11.5px;
+            }
+            .info-label {
+              display: inline-block;
+              width: 110px;
+              color: #64748b;
+              font-weight: 600;
+            }
+            .info-val {
+              font-weight: 700;
+              color: #0f172a;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 10px;
+              margin-bottom: 18px;
+            }
+            th {
+              background-color: #f1f5f9;
+              color: #0f172a;
+              font-weight: 800;
+              font-size: 11px;
+              text-transform: uppercase;
+              padding: 8px;
+              border: 1px solid #cbd5e1;
+            }
+            .notice-box {
+              background-color: #fffbeb;
+              border: 1px dashed #f59e0b;
+              padding: 10px 14px;
+              border-radius: 6px;
+              font-size: 11px;
+              color: #92400e;
+              margin-bottom: 25px;
+            }
+            .notice-box ul {
+              margin: 4px 0 0 18px;
+              padding: 0;
+            }
+            .signatures {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 20px;
+              margin-top: 30px;
+              text-align: center;
+            }
+            .sign-col {
+              border: 1px solid #e2e8f0;
+              border-radius: 6px;
+              padding: 10px 8px;
+              background: #ffffff;
+            }
+            .sign-title {
+              font-size: 11px;
+              font-weight: 800;
+              color: #334155;
+              text-transform: uppercase;
+              margin-bottom: 60px;
+            }
+            .sign-line {
+              font-weight: 800;
+              color: #0f172a;
+              border-top: 1px solid #0f172a;
+              padding-top: 4px;
+              display: inline-block;
+              width: 80%;
+            }
+            .sign-sub {
+              font-size: 10px;
+              color: #64748b;
+              margin-top: 2px;
+            }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="company-title">CV. SINAR ABADI NIAGA</div>
+              <div class="company-sub">Distributor Utama Perlengkapan Bahan Bangunan & Alat Teknik</div>
+              <div class="company-sub">Jl. Industri Raya No. 45, Manado, Sulawesi Utara | Telp: (0431) 889211</div>
+            </div>
+            <div class="doc-badge">
+              <div class="doc-title">Surat Jalan</div>
+              <div class="doc-no">SJ-${order.nomor}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Ref SO: ${order.nomor}</div>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-block">
+              <p><span class="info-label">Kepada Toko:</span> <span class="info-val">${order.pelanggan?.nama_toko || "-"}</span></p>
+              <p><span class="info-label">Alamat Kirim:</span> <span class="info-val">${order.pelanggan?.alamat || "-"}</span></p>
+              <p><span class="info-label">Telepon Toko:</span> <span class="info-val">${order.pelanggan?.telepon || "-"}</span></p>
+            </div>
+            <div class="info-block">
+              <p><span class="info-label">Tanggal Kirim:</span> <span class="info-val">${tanggalFormatted}</span></p>
+              <p><span class="info-label">Sales Pembuat:</span> <span class="info-val">${order.pembuat?.nama_lengkap || "-"}</span></p>
+              <p><span class="info-label">Status Dokumen:</span> <span class="info-val" style="text-transform: capitalize;">${order.status}</span></p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">No</th>
+                <th style="width: 120px;">Kode Barang</th>
+                <th>Deskripsi / Nama Barang</th>
+                <th style="width: 80px; text-align: center;">Jumlah</th>
+                <th style="width: 70px; text-align: center;">Satuan</th>
+                <th style="width: 120px; text-align: center;">Verifikasi Fisik</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div class="notice-box">
+            <strong>Perhatian Serah Terima Barang:</strong>
+            <ul>
+              <li>Barang diterima dalam jumlah fisik utuh, segel baik, dan tidak ada cacat tampak.</li>
+              <li>Klaim kekurangan atau kerusakan wajib dicatat pada kolom catatan lembar ini sebelum ditandatangani.</li>
+              <li>Surat jalan rangkap 3: Lembar 1 (Toko), Lembar 2 (Finance/Gudang), Lembar 3 (Sopir/Arsip).</li>
+            </ul>
+          </div>
+
+          <div class="signatures">
+            <div class="sign-col">
+              <div class="sign-title">Diserahkan Oleh (Gudang)</div>
+              <div class="sign-line">( ................................ )</div>
+              <div class="sign-sub">Tgl: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+            </div>
+            <div class="sign-col">
+              <div class="sign-title">Dibawa Oleh (Pengemudi/Sopir)</div>
+              <div class="sign-line">( ................................ )</div>
+              <div class="sign-sub">No Pol: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+            </div>
+            <div class="sign-col">
+              <div class="sign-title">Diterima Oleh (Toko / Cap)</div>
+              <div class="sign-line">${order.pelanggan?.nama_toko ? `( ${order.pelanggan.nama_toko} )` : "( ................................ )"}</div>
+              <div class="sign-sub">Tanda Tangan & Cap Toko</div>
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+  };
+
   const filteredOrders = orders.filter((o) => {
     const matchSearch =
       o.nomor.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -686,6 +950,19 @@ export function PesananClientView({
                           </Button>
                         )}
 
+                        {/* Fitur Nilai Tambah #2: Cetak Surat Jalan Pengemudi (Delivery Order tanpa harga - BR-12) */}
+                        {["dikonfirmasi", "dikirim", "lunas"].includes(order.status) && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePrintSuratJalan(order)}
+                            title="Cetak Surat Jalan Pengemudi (Delivery Order)"
+                            className="h-8 px-2 text-xs text-blue-700 border-blue-300 hover:bg-blue-50 font-bold flex items-center gap-1 shadow-xs"
+                          >
+                            <Printer className="h-3.5 w-3.5" /> Surat Jalan
+                          </Button>
+                        )}
+
                         {/* Tombol Detail Selalu Ada */}
                         <Button
                           variant="outline"
@@ -798,7 +1075,19 @@ export function PesananClientView({
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
+            <div>
+              {selectedOrder && ["dikonfirmasi", "dikirim", "lunas"].includes(selectedOrder.status) && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => handlePrintSuratJalan(selectedOrder)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
+                >
+                  <Printer className="w-4 h-4" /> Cetak Surat Jalan
+                </Button>
+              )}
+            </div>
             <Button
               type="button"
               variant="outline"
