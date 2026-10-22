@@ -112,6 +112,22 @@ export function PesananClientView({
   const [orderToConfirm, setOrderToConfirm] = useState<PesananItem | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
 
+  // Modal Pengiriman Pesanan (Langkah 6.3: BR-07)
+  const [isShipOpen, setIsShipOpen] = useState(false);
+  const [orderToShip, setOrderToShip] = useState<PesananItem | null>(null);
+  const [isShipping, setIsShipping] = useState(false);
+
+  // Modal Pelunasan Pesanan (Langkah 6.3: BR-07)
+  const [isSettleOpen, setIsSettleOpen] = useState(false);
+  const [orderToSettle, setOrderToSettle] = useState<PesananItem | null>(null);
+  const [isSettling, setIsSettling] = useState(false);
+
+  // Modal Pembatalan Pesanan (Langkah 6.3: BR-08)
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<PesananItem | null>(null);
+  const [alasanBatal, setAlasanBatal] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+
   const openConfirmModal = (order: PesananItem) => {
     setOrderToConfirm(order);
     setIsConfirmOpen(true);
@@ -161,6 +177,207 @@ export function PesananClientView({
       toast.error(err.message || "Terjadi kesalahan saat konfirmasi pesanan.");
     } finally {
       setIsConfirming(false);
+    }
+  };
+
+  // STEP 6.3: HANDLER PENGIRIMAN PESANAN (BR-07)
+  const openShipModal = (order: PesananItem) => {
+    setOrderToShip(order);
+    setIsShipOpen(true);
+  };
+
+  const handleShipOrder = async () => {
+    if (!orderToShip) return;
+
+    setIsShipping(true);
+    try {
+      const termin = orderToShip.pelanggan?.termin_hari ?? 0;
+      const today = new Date();
+      const jatuhTempoDate = new Date(today);
+      jatuhTempoDate.setDate(today.getDate() + termin);
+      const jatuhTempoStr = jatuhTempoDate.toISOString().split("T")[0];
+
+      const { error } = await supabase
+        .from("pesanan_jual")
+        .update({
+          status: "dikirim",
+          dikirim_pada: new Date().toISOString(),
+          jatuh_tempo: jatuhTempoStr,
+        })
+        .eq("id", orderToShip.id);
+
+      if (error) {
+        toast.error(error.message);
+        setIsShipping(false);
+        return;
+      }
+
+      // Catat ke Audit Log sistem (BR-12)
+      await supabase.from("audit_log").insert({
+        pelaku_id: currentUserId,
+        aksi: "kirim_pesanan",
+        nama_tabel: "pesanan_jual",
+        data_id: orderToShip.id,
+        nilai_lama: { status: "dikonfirmasi" },
+        nilai_baru: { status: "dikirim", jatuh_tempo: jatuhTempoStr },
+      });
+
+      toast.success(
+        `Pesanan ${orderToShip.nomor} telah dikirim! Jatuh tempo pembayaran diatur ${termin} hari (tanggal ${formatDate(jatuhTempoStr)}).`
+      );
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderToShip.id
+            ? {
+                ...o,
+                status: "dikirim" as const,
+                dikirim_pada: new Date().toISOString(),
+                jatuh_tempo: jatuhTempoStr,
+              }
+            : o
+        )
+      );
+
+      setIsShipOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mencatat pengiriman pesanan.");
+    } finally {
+      setIsShipping(false);
+    }
+  };
+
+  // STEP 6.3: HANDLER PELUNASAN PESANAN (BR-07 - Khusus Manajer)
+  const openSettleModal = (order: PesananItem) => {
+    setOrderToSettle(order);
+    setIsSettleOpen(true);
+  };
+
+  const handleSettleOrder = async () => {
+    if (!orderToSettle || !isManajer) return;
+
+    setIsSettling(true);
+    try {
+      const nowIso = new Date().toISOString();
+      const { error } = await supabase
+        .from("pesanan_jual")
+        .update({
+          status: "lunas",
+          dilunasi_pada: nowIso,
+        })
+        .eq("id", orderToSettle.id);
+
+      if (error) {
+        toast.error(error.message);
+        setIsSettling(false);
+        return;
+      }
+
+      // Catat ke Audit Log sistem (BR-12)
+      await supabase.from("audit_log").insert({
+        pelaku_id: currentUserId,
+        aksi: "lunas_pesanan",
+        nama_tabel: "pesanan_jual",
+        data_id: orderToSettle.id,
+        nilai_lama: { status: orderToSettle.status },
+        nilai_baru: { status: "lunas", dilunasi_pada: nowIso },
+      });
+
+      toast.success(`Pembayaran pesanan ${orderToSettle.nomor} berhasil dicatat LUNAS!`);
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderToSettle.id
+            ? { ...o, status: "lunas" as const, dilunasi_pada: nowIso }
+            : o
+        )
+      );
+
+      setIsSettleOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mencatat pelunasan pesanan.");
+    } finally {
+      setIsSettling(false);
+    }
+  };
+
+  // STEP 6.3: HANDLER PEMBATALAN PESANAN (BR-08 - Khusus Manajer untuk Dikonfirmasi)
+  const openCancelModal = (order: PesananItem) => {
+    setOrderToCancel(order);
+    setAlasanBatal("");
+    setIsCancelOpen(true);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+
+    const alasan = alasanBatal.trim();
+    if (alasan.length < 10) {
+      toast.error("Alasan pembatalan wajib diisi paling sedikit 10 karakter (BR-08).");
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      if (orderToCancel.status === "dikonfirmasi") {
+        // Panggil Stored Procedure batalkan_pesanan_dikonfirmasi (mengembalikan stok ke gudang: BR-08)
+        const { data, error } = await supabase.rpc("batalkan_pesanan_dikonfirmasi", {
+          p_pesanan_id: orderToCancel.id,
+          p_pelaku_id: currentUserId,
+          p_alasan: alasan,
+        });
+
+        if (error) {
+          toast.error(error.message);
+          setIsCancelling(false);
+          return;
+        }
+
+        if (data && typeof data === "object" && !data.success) {
+          toast.error(data.message || "Gagal membatalkan pesanan.");
+          setIsCancelling(false);
+          return;
+        }
+
+        toast.success(
+          `Pesanan ${orderToCancel.nomor} telah dibatalkan. Seluruh stok barang telah dikembalikan ke gudang.`
+        );
+      } else {
+        // Jika masih draf, batalkan langsung
+        const { error } = await supabase
+          .from("pesanan_jual")
+          .update({
+            status: "dibatalkan",
+            alasan_batal: alasan,
+            dibatalkan_pada: new Date().toISOString(),
+          })
+          .eq("id", orderToCancel.id);
+
+        if (error) {
+          toast.error(error.message);
+          setIsCancelling(false);
+          return;
+        }
+
+        toast.success(`Draf pesanan ${orderToCancel.nomor} telah dibatalkan.`);
+      }
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderToCancel.id
+            ? { ...o, status: "dibatalkan" as const, alasan_batal: alasan }
+            : o
+        )
+      );
+
+      setIsCancelOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal membatalkan pesanan.");
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -423,6 +640,7 @@ export function PesananClientView({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {/* AKSI 1: Konfirmasi Pesanan (Draf -> Dikonfirmasi) */}
                         {order.status === "draf" && canCreate && (
                           <Button
                             size="sm"
@@ -432,6 +650,43 @@ export function PesananClientView({
                             <CheckCircle2 className="h-3.5 w-3.5" /> Konfirmasi
                           </Button>
                         )}
+
+                        {/* AKSI 2: Kirim Pesanan oleh Gudang / Manajer (Dikonfirmasi -> Dikirim: BR-07) */}
+                        {order.status === "dikonfirmasi" && (userRole === "gudang" || isManajer) && (
+                          <Button
+                            size="sm"
+                            onClick={() => openShipModal(order)}
+                            className="h-8 px-2.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                          >
+                            <Truck className="h-3.5 w-3.5" /> Kirim
+                          </Button>
+                        )}
+
+                        {/* AKSI 3: Pelunasan oleh Manajer (Dikirim -> Lunas: BR-07) */}
+                        {order.status === "dikirim" && isManajer && (
+                          <Button
+                            size="sm"
+                            onClick={() => openSettleModal(order)}
+                            className="h-8 px-2.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Pelunasan
+                          </Button>
+                        )}
+
+                        {/* AKSI 4: Batalkan Pesanan (Draf oleh sales/manajer, atau Dikonfirmasi oleh Manajer: BR-08) */}
+                        {((order.status === "draf" && (order.dibuat_oleh === currentUserId || isManajer)) ||
+                          (order.status === "dikonfirmasi" && isManajer)) && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openCancelModal(order)}
+                            className="h-8 px-2 text-xs text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50 font-bold flex items-center gap-0.5"
+                          >
+                            <Ban className="h-3.5 w-3.5 mr-0.5" /> Batal
+                          </Button>
+                        )}
+
+                        {/* Tombol Detail Selalu Ada */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -638,6 +893,245 @@ export function PesananClientView({
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: PENGIRIMAN PESANAN OLEH GUDANG (LANGKAH 6.3: BR-07)              */}
+      {/* ========================================================================= */}
+      <Dialog open={isShipOpen} onOpenChange={setIsShipOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <Truck className="w-5 h-5 text-blue-600" />
+              Catat Pengiriman Barang ({orderToShip?.nomor})
+            </DialogTitle>
+            <DialogDescription>
+              Staf Gudang mencatat barang telah diberangkatkan ke toko pelanggan. Tanggal jatuh tempo akan otomatis dihitung (BR-07).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2 text-xs">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Toko Pelanggan:</span>
+                <span className="font-bold text-slate-900">{orderToShip?.pelanggan?.nama_toko}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Termin Pembayaran:</span>
+                <span className="font-bold text-blue-800">
+                  {orderToShip?.pelanggan?.termin_hari === 0
+                    ? "0 Hari (Tunai / COD)"
+                    : `${orderToShip?.pelanggan?.termin_hari} Hari`}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Total Tagihan:</span>
+                <span className="font-black text-slate-900">
+                  {orderToShip ? formatRupiah(orderToShip.total) : "Rp0"}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 text-blue-900 text-[11px] space-y-1">
+              <div className="font-bold">Kalkulasi Otomatis Jatuh Tempo:</div>
+              <p>
+                Tanggal kirim hari ini + termin bayar ({orderToShip?.pelanggan?.termin_hari || 0} hari). Piutang toko ini akan tercatat aktif dalam sistem.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isShipping}
+              onClick={() => setIsShipOpen(false)}
+              className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isShipping}
+              onClick={handleShipOrder}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-sm"
+            >
+              {isShipping ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Mengirim...
+                </>
+              ) : (
+                <>
+                  <Truck className="w-4 h-4" /> Konfirmasi Pengiriman
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: PELUNASAN PESANAN OLEH MANAJER (LANGKAH 6.3: BR-07)              */}
+      {/* ========================================================================= */}
+      <Dialog open={isSettleOpen} onOpenChange={setIsSettleOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              Catat Pelunasan Pembayaran ({orderToSettle?.nomor})
+            </DialogTitle>
+            <DialogDescription>
+              Hanya Manajer yang berhak mencatat penerimaan pembayaran dari pelanggan (BR-07).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2 text-xs">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Toko Pelanggan:</span>
+                <span className="font-bold text-slate-900">{orderToSettle?.pelanggan?.nama_toko}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status Saat Ini:</span>
+                <span className="font-bold text-blue-700 uppercase tracking-wider text-[11px]">
+                  {orderToSettle?.status}
+                </span>
+              </div>
+              <div className="flex justify-between border-t border-slate-200 pt-2">
+                <span className="text-slate-700 font-bold">Total Nilai yang Dilunasi:</span>
+                <span className="font-black text-emerald-700 text-sm">
+                  {orderToSettle ? formatRupiah(orderToSettle.total) : "Rp0"}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+              Setelah dicatat lunas, piutang pelanggan untuk transaksi ini akan terhapus dan batas plafon kredit toko akan pulih otomatis.
+            </p>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSettling}
+              onClick={() => setIsSettleOpen(false)}
+              className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isSettling}
+              onClick={handleSettleOrder}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-sm"
+            >
+              {isSettling ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Ya, Catat Lunas
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: PEMBATALAN PESANAN (LANGKAH 6.3: BR-08)                          */}
+      {/* ========================================================================= */}
+      <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Ban className="w-5 h-5" />
+              Batalkan Pesanan ({orderToCancel?.nomor})
+            </DialogTitle>
+            <DialogDescription>
+              {orderToCancel?.status === "dikonfirmasi"
+                ? "Pesanan terkonfirmasi yang dibatalkan Manajer akan otomatis mengembalikan seluruh stok barang ke gudang (BR-08)."
+                : "Draf pesanan akan dibatalkan."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCancelOrder();
+            }}
+            className="space-y-3 py-2 text-xs"
+          >
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Toko Pelanggan:</span>
+                <span className="font-bold text-slate-900">{orderToCancel?.pelanggan?.nama_toko}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Total Nilai:</span>
+                <span className="font-black text-slate-900">
+                  {orderToCancel ? formatRupiah(orderToCancel.total) : "Rp0"}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-900">
+                Alasan Pembatalan (Wajib minimal 10 karakter) *
+              </label>
+              <textarea
+                required
+                minLength={10}
+                rows={3}
+                placeholder="Contoh: Toko membatalkan pesanan karena kendala tempat penyimpanan."
+                value={alasanBatal}
+                onChange={(e) => setAlasanBatal(e.target.value)}
+                className="w-full text-xs font-medium text-slate-900 rounded-md border border-slate-300 p-2.5 focus:outline-none focus:ring-2 focus:ring-red-600 placeholder:text-slate-400"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500">
+                <span>Panjang: {alasanBatal.trim().length} / min. 10 karakter</span>
+                {alasanBatal.trim().length < 10 && (
+                  <span className="text-red-600 font-semibold">Kurang {10 - alasanBatal.trim().length} karakter lagi</span>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isCancelling}
+                onClick={() => setIsCancelOpen(false)}
+                className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+              >
+                Kembali
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isCancelling || alasanBatal.trim().length < 10}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold flex items-center gap-1.5 shadow-sm"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Membatalkan...
+                  </>
+                ) : (
+                  <>
+                    <Ban className="w-4 h-4" /> Konfirmasi Pembatalan
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
