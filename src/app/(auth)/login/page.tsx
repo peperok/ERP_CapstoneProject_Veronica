@@ -7,38 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Lock, Mail, AlertCircle, Loader2 } from "lucide-react";
-
-const quickAccounts = [
-  {
-    role: "Manajer",
-    nama: "Hendra Wijaya",
-    email: "hendra@sinarabadi.test",
-    pass: "Latihan#2026",
-    badgeVariant: "default" as const,
-  },
-  {
-    role: "Staf Penjualan",
-    nama: "Rina Kartika",
-    email: "rina@sinarabadi.test",
-    pass: "Latihan#2026",
-    badgeVariant: "secondary" as const,
-  },
-  {
-    role: "Staf Gudang",
-    nama: "Joko Susanto",
-    email: "joko@sinarabadi.test",
-    pass: "Latihan#2026",
-    badgeVariant: "outline" as const,
-  },
-  {
-    role: "Staf Nonaktif (Uji Penolakan)",
-    nama: "Agus Salim",
-    email: "agus@sinarabadi.test",
-    pass: "Latihan#2026",
-    badgeVariant: "destructive" as const,
-  },
-];
+import { Building2, Lock, Mail, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,6 +15,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -111,12 +81,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillQuickAccount = (em: string, pw: string) => {
-    setEmail(em);
-    setPassword(pw);
-    setErrorMessage(null);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -178,14 +142,26 @@ export default function LoginPage() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 bg-slate-50 border-slate-200 text-sm focus-visible:ring-blue-600"
+                    className="pl-9 pr-10 bg-slate-50 border-slate-200 text-sm focus-visible:ring-blue-600"
                     disabled={loading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 focus:outline-none transition-colors"
+                    aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -204,38 +180,12 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Quick Fill Akun Uji Untuk Mentor & Pengujian */}
-            <div className="pt-3 border-t border-slate-100">
-              <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                Pilih Cepat Akun Uji:
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {quickAccounts.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => fillQuickAccount(acc.email, acc.pass)}
-                    className="p-2 text-left rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all group"
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-semibold text-slate-800 group-hover:text-blue-700">
-                        {acc.nama}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5 truncate">
-                      {acc.role}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
 
         {/* Footer Note */}
         <p className="text-center text-xs text-slate-500">
-          Aplikasi Internal CV Sinar Abadi Niaga &bull; Capstone Project 2026
+          Hak Cipta &copy; {new Date().getFullYear()} CV Sinar Abadi Niaga. Seluruh hak cipta dilindungi.
         </p>
       </div>
     </div>

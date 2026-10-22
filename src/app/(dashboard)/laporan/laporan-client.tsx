@@ -448,7 +448,7 @@ export function LaporanClientView({
             <div class="doc-info">
               <div><strong>LAPORAN RESMI KEUANGAN</strong></div>
               <div>Tanggal: ${currentDate}</div>
-              <div>Klasifikasi: RAHASIA MANAJER (BR-12)</div>
+              <div>Klasifikasi: RAHASIA INTERNAL MANAJEMEN</div>
             </div>
           </div>
 
@@ -638,7 +638,7 @@ export function LaporanClientView({
               Laporan Keuangan & Kinerja Bisnis
             </h1>
             <Badge className="bg-emerald-600 text-white font-bold text-[11px]">
-              Khusus Manajer (BR-12)
+              Khusus Manajer
             </Badge>
           </div>
           <p className="text-sm font-medium text-slate-600 mt-1">

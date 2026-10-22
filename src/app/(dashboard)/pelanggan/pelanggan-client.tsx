@@ -316,7 +316,7 @@ export function PelangganClientView({
               <TableHead className="text-center">Termin</TableHead>
               <TableHead className="text-right">Batas Kredit</TableHead>
               <TableHead className="text-right">Piutang Berjalan</TableHead>
-              <TableHead className="text-center">Status Kelayakan (BR-05)</TableHead>
+              <TableHead className="text-center">Status Kelayakan Kredit</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
@@ -414,7 +414,7 @@ export function PelangganClientView({
             <DialogDescription>
               {isManajer
                 ? "Manajer dapat langsung menentukan plafon batas kredit pelanggan baru."
-                : "Pelanggan baru yang dibuat Staf Penjualan otomatis mendapat batas kredit Rp0 sampai diubah Manajer (BR-05)."}
+                : "Pelanggan baru yang dibuat Staf Penjualan otomatis mendapat batas kredit awal Rp0 sampai disetujui Manajer."}
             </DialogDescription>
           </DialogHeader>
 
@@ -543,7 +543,7 @@ export function PelangganClientView({
             <DialogTitle>Ubah Data Pelanggan ({selectedPelanggan?.kode})</DialogTitle>
             <DialogDescription>
               {isManajer
-                ? "Manajer memiliki hak eksklusif mengubah batas kredit toko pelanggan (BR-05)."
+                ? "Manajer memiliki hak eksklusif mengubah batas kredit toko pelanggan."
                 : "Staf Penjualan hanya dapat memperbarui kontak dan alamat toko."}
             </DialogDescription>
           </DialogHeader>
@@ -595,7 +595,7 @@ export function PelangganClientView({
               />
             </div>
 
-            {/* Field Batas Kredit: Hanya Manajer (BR-05) */}
+            {/* Field Batas Kredit: Hanya Manajer */}
             {isManajer ? (
               <div className="space-y-1.5 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                 <label className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
@@ -610,7 +610,7 @@ export function PelangganClientView({
                   className="text-xs bg-white font-semibold"
                 />
                 <p className="text-[10px] text-blue-700">
-                  Perubahan batas kredit akan otomatis dicatat pada Audit Log sistem (BR-12).
+                  Perubahan batas kredit akan otomatis dicatat pada riwayat audit sistem.
                 </p>
               </div>
             ) : (

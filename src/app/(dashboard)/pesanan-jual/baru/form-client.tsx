@@ -86,10 +86,10 @@ export function FormPesananBaruClient({
 
   const selectedPelanggan = pelangganList.find((p) => p.id === selectedPelangganId);
 
-  // Handler: Tambah Baris Barang (Maksimal 20 baris: BR-02)
+  // Handler: Tambah Baris Barang (Maksimal 20 baris)
   const handleAddRow = () => {
     if (items.length >= 20) {
-      toast.error("Maksimal 20 baris barang per pesanan jual (BR-02).");
+      toast.error("Maksimal 20 baris barang per pesanan jual.");
       return;
     }
     const newRowId = `row-${Date.now()}-${items.length + 1}`;
@@ -105,10 +105,10 @@ export function FormPesananBaruClient({
     ]);
   };
 
-  // Handler: Hapus Baris Barang (Minimal 1 baris: BR-02)
+  // Handler: Hapus Baris Barang (Minimal 1 baris)
   const handleRemoveRow = (rowId: string) => {
     if (items.length <= 1) {
-      toast.error("Pesanan jual wajib memiliki paling sedikit 1 baris barang (BR-02).");
+      toast.error("Pesanan jual wajib memiliki paling sedikit 1 baris barang.");
       return;
     }
     setItems((prev) => prev.filter((r) => r.id !== rowId));
@@ -116,7 +116,6 @@ export function FormPesananBaruClient({
 
   // Handler: Ganti Pilihan Barang pada Baris
   const handleBarangChange = (rowId: string, newBarangId: string) => {
-    // Cek duplikasi barang di baris lain (BR-02)
     if (newBarangId) {
       const isDuplicate = items.some(
         (r) => r.id !== rowId && r.barang_id === newBarangId
@@ -124,7 +123,7 @@ export function FormPesananBaruClient({
       if (isDuplicate) {
         const dupItem = barangList.find((b) => b.id === newBarangId);
         toast.error(
-          `Barang "${dupItem?.nama}" sudah dipilih di baris lain. Satu pesanan tidak boleh memiliki barang yang sama di baris berbeda (BR-02).`
+          `Barang "${dupItem?.nama}" sudah dipilih di baris lain. Satu pesanan tidak boleh memiliki barang yang sama di baris berbeda.`
         );
         return;
       }
@@ -197,7 +196,7 @@ export function FormPesananBaruClient({
 
     // Validasi baris item
     if (items.length < 1 || items.length > 20) {
-      toast.error("Jumlah baris barang harus antara 1 sampai 20 baris (BR-02).");
+      toast.error("Jumlah baris barang harus antara 1 sampai 20 baris.");
       return;
     }
 
@@ -212,11 +211,11 @@ export function FormPesananBaruClient({
         return;
       }
 
-      // Validasi duplikasi barang (BR-02)
+      // Validasi duplikasi barang
       if (checkedBarangIds.has(row.barang_id)) {
         const itemInfo = barangList.find((b) => b.id === row.barang_id);
         toast.error(
-          `Barang "${itemInfo?.nama}" terduplikasi pada baris ke-${rowNum}. Setiap barang hanya boleh muncul 1 kali (BR-02).`
+          `Barang "${itemInfo?.nama}" terduplikasi pada baris ke-${rowNum}. Setiap barang hanya boleh muncul 1 kali.`
         );
         return;
       }
@@ -239,10 +238,10 @@ export function FormPesananBaruClient({
         return;
       }
 
-      // Validasi batas diskon (BR-03: Sales max 10%, Manajer max 25%)
+      // Validasi batas diskon
       if (diskon > maxDiskonAllowed) {
         toast.error(
-          `Baris ke-${rowNum}: Diskon ${diskon}% melampaui batas wewenang. Batas diskon untuk peran Anda adalah maksimal ${maxDiskonAllowed}% (BR-03).`
+          `Baris ke-${rowNum}: Diskon ${diskon}% melampaui batas wewenang. Batas diskon untuk peran Anda adalah maksimal ${maxDiskonAllowed}%.`
         );
         return;
       }
@@ -329,7 +328,7 @@ export function FormPesananBaruClient({
               Buat Draf Pesanan Jual Baru (Sales Order)
             </h1>
             <p className="text-xs text-slate-600 font-medium">
-              Satu pesanan dapat memuat 1 s/d 20 baris barang tanpa duplikasi item (BR-02).
+              Satu pesanan dapat memuat 1 s/d 20 baris barang tanpa duplikasi item.
             </p>
           </div>
         </div>
@@ -414,7 +413,7 @@ export function FormPesananBaruClient({
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
                 Maksimal diskon untuk peran Anda:{" "}
-                <strong className="text-blue-700">{maxDiskonAllowed}%</strong> (BR-03).
+                <strong className="text-blue-700">{maxDiskonAllowed}%</strong>.
               </p>
             </div>
 
@@ -587,7 +586,7 @@ export function FormPesananBaruClient({
             </Button>
 
             <span className="text-[11px] text-slate-500 font-medium">
-              * Setiap item barang wajib unik dan memiliki jumlah minimal 1 (BR-02).
+              * Setiap item barang wajib unik dan memiliki jumlah minimal 1.
             </span>
           </div>
         </div>

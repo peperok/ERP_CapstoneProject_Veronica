@@ -160,7 +160,7 @@ export function PengaturanClientView({
               Pengaturan Sistem & Audit Log
             </h1>
             <Badge className="bg-emerald-600 text-white font-bold text-[11px]">
-              Khusus Manajer (BR-12)
+              Khusus Manajer
             </Badge>
           </div>
           <p className="text-sm font-medium text-slate-600 mt-1">

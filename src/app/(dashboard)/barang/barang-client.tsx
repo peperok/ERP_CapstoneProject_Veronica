@@ -178,11 +178,11 @@ export function BarangClientView({
     setIsAddOpen(true);
   };
 
-  // Handler: Tambah Barang Baru (BR-01)
+  // Handler: Tambah Barang Baru
   const handleAddBarang = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isManajer) {
-      toast.error("Hanya Manajer yang berhak menambah barang baru (BR-01).");
+      toast.error("Hanya Manajer yang berhak menambah barang baru.");
       return;
     }
 
@@ -190,7 +190,7 @@ export function BarangClientView({
     const stokMin = Number(addForm.stok_minimum);
 
     if (hargaJual <= 0) {
-      toast.error("Harga jual harus lebih dari Rp0 (BR-01).");
+      toast.error("Harga jual harus lebih dari Rp0.");
       return;
     }
 
@@ -266,7 +266,7 @@ export function BarangClientView({
     const stokMin = Number(editForm.stok_minimum);
 
     if (isManajer && hargaJual <= 0) {
-      toast.error("Harga jual harus lebih dari Rp0 (BR-01).");
+      toast.error("Harga jual harus lebih dari Rp0.");
       return;
     }
 
@@ -347,12 +347,12 @@ export function BarangClientView({
     const alasan = opnameForm.alasan.trim();
 
     if (isNaN(stokBaru) || stokBaru < 0) {
-      toast.error("Stok hasil penyesuaian tidak boleh negatif (BR-11).");
+      toast.error("Stok hasil penyesuaian tidak boleh negatif.");
       return;
     }
 
     if (alasan.length < 10) {
-      toast.error("Alasan penyesuaian fisik wajib minimal 10 karakter (BR-11).");
+      toast.error("Alasan penyesuaian fisik wajib minimal 10 karakter.");
       return;
     }
 
@@ -620,7 +620,7 @@ export function BarangClientView({
           <DialogHeader>
             <DialogTitle>Tambah Barang Baru</DialogTitle>
             <DialogDescription>
-              Hanya Manajer yang berhak menambahkan barang baru ke katalog distributor (BR-01).
+              Hanya Manajer yang berhak menambahkan barang baru ke katalog distributor.
             </DialogDescription>
           </DialogHeader>
 
@@ -690,7 +690,7 @@ export function BarangClientView({
             </div>
 
             <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-              * Sesuai aturan <strong>BR-01 & BR-10</strong>: Stok awal bernilai 0. Stok dan Harga Pokok (HPP) akan diperbarui otomatis saat barang diterima dari pemasok lewat dokumen Pembelian (PO).
+              * Catatan: Stok awal bernilai 0. Stok dan Harga Pokok (HPP) akan diperbarui otomatis saat barang diterima dari pemasok lewat dokumen Pembelian (PO).
             </p>
 
             <DialogFooter className="pt-3">
@@ -727,7 +727,7 @@ export function BarangClientView({
             <DialogDescription>
               {isManajer
                 ? "Manajer dapat mengubah nama, harga jual, stok minimum, dan status aktif."
-                : "Staf Gudang hanya boleh mengubah nama, satuan, dan stok minimum (BR-01)."}
+                : "Staf Gudang hanya boleh mengubah nama, satuan, dan stok minimum."}
             </DialogDescription>
           </DialogHeader>
 
@@ -765,7 +765,7 @@ export function BarangClientView({
               </div>
             </div>
 
-            {/* Field Harga Jual: Khusus Manajer (BR-01) */}
+            {/* Field Harga Jual: Khusus Manajer */}
             {isManajer ? (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -773,7 +773,7 @@ export function BarangClientView({
                     Harga Jual Satuan (Rp) *
                   </label>
                   <span className="text-[10px] text-blue-700 font-semibold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                    Khusus Manajer (BR-01)
+                    Khusus Manajer
                   </span>
                 </div>
                 <Input
@@ -829,14 +829,14 @@ export function BarangClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* DIALOG PENYESUAIAN STOK FISIK / OPNAME (BR-11)                            */}
+      {/* DIALOG PENYESUAIAN STOK FISIK / OPNAME                                    */}
       {/* ========================================================================= */}
       <Dialog open={isOpnameOpen} onOpenChange={setIsOpnameOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Penyesuaian Stok Fisik ({selectedBarang?.nama})</DialogTitle>
             <DialogDescription>
-              Hasil hitung fisik gudang akan langsung mengubah stok dan tercatat di kartu stok (BR-11).
+              Hasil hitung fisik gudang akan langsung mengubah stok dan tercatat di riwayat kartu mutasi barang.
             </DialogDescription>
           </DialogHeader>
 

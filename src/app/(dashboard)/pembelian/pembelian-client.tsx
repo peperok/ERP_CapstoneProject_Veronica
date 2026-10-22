@@ -168,9 +168,9 @@ export function PembelianClientView({
 
     const qty = parseInt(addForm.jumlah_dipesan, 10);
 
-    // Validasi BR-09: Jumlah 1 sampai 10.000
+    // Validasi: Jumlah 1 sampai 10.000
     if (isNaN(qty) || qty < 1 || qty > 10000) {
-      toast.error("Jumlah dipesan harus bilangan bulat antara 1 sampai 10.000 (BR-09).");
+      toast.error("Jumlah dipesan harus bilangan bulat antara 1 sampai 10.000.");
       return;
     }
 
@@ -227,9 +227,9 @@ export function PembelianClientView({
 
     const hargaBeli = Number(hargaBeliInput);
 
-    // Validasi BR-09: Harga beli satuan harus lebih dari 0
+    // Validasi: Harga beli satuan harus lebih dari 0
     if (isNaN(hargaBeli) || hargaBeli <= 0) {
-      toast.error("Manajer wajib mengisi harga beli satuan lebih dari Rp0 (BR-09).");
+      toast.error("Manajer wajib mengisi harga beli satuan lebih dari Rp0.");
       return;
     }
 
@@ -298,9 +298,9 @@ export function PembelianClientView({
 
     const alasan = alasanTolak.trim();
 
-    // Validasi BR-09: Alasan tolak minimal 10 karakter
+    // Validasi: Alasan tolak minimal 10 karakter
     if (alasan.length < 10) {
-      toast.error("Alasan penolakan wajib diisi paling sedikit 10 karakter (BR-09).");
+      toast.error("Alasan penolakan wajib diisi paling sedikit 10 karakter.");
       return;
     }
 
@@ -369,10 +369,10 @@ export function PembelianClientView({
 
     const qtyDiterima = parseInt(jumlahDiterimaInput, 10);
 
-    // Validasi BR-10: Jumlah diterima 1 sampai jumlah dipesan
+    // Validasi: Jumlah diterima 1 sampai jumlah dipesan
     if (isNaN(qtyDiterima) || qtyDiterima < 1 || qtyDiterima > selectedPO.jumlah_dipesan) {
       toast.error(
-        `Jumlah diterima harus antara 1 sampai ${selectedPO.jumlah_dipesan} unit (BR-10).`
+        `Jumlah diterima harus antara 1 sampai ${selectedPO.jumlah_dipesan} unit.`
       );
       return;
     }
@@ -399,7 +399,7 @@ export function PembelianClientView({
       }
 
       toast.success(
-        `Barang berhasil diterima! Stok fisik bertambah +${qtyDiterima} dan HPP telah diperbarui (BR-10).`
+        `Barang berhasil diterima! Stok fisik bertambah +${qtyDiterima} dan HPP telah diperbarui.`
       );
 
       setPurchases((prev) =>
@@ -700,7 +700,7 @@ export function PembelianClientView({
           <DialogHeader>
             <DialogTitle>Ajukan Pembelian Baru (PO ke Pemasok)</DialogTitle>
             <DialogDescription>
-              Staf Gudang dan Manajer dapat mengajukan pembelian untuk satu barang ke satu pemasok (BR-09).
+              Staf Gudang dan Manajer dapat mengajukan permohonan pembelian barang ke pemasok.
             </DialogDescription>
           </DialogHeader>
 
@@ -771,7 +771,7 @@ export function PembelianClientView({
             </div>
 
             <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-              * Sesuai aturan <strong>BR-09</strong>: Harga beli belum diisi di form ini. Harga beli satuan akan diisi oleh <strong>Manajer</strong> saat menyetujui pengajuan.
+              * Catatan: Harga beli satuan akan ditetapkan oleh <strong>Manajer</strong> saat menyetujui dokumen pengajuan ini.
             </p>
 
             <DialogFooter className="pt-3">
@@ -798,14 +798,14 @@ export function PembelianClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 2: PERSETUJUAN PO OLEH MANAJER (STEP 5.2: BR-09)                    */}
+      {/* MODAL 2: PERSETUJUAN PO OLEH MANAJER                                      */}
       {/* ========================================================================= */}
       <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Setujui Pembelian ({selectedPO?.nomor})</DialogTitle>
             <DialogDescription>
-              Hanya Manajer yang berhak menyetujui pembelian sambil mengisi harga beli satuan lebih dari Rp0 (BR-09).
+              Wewenang Manajer untuk menyetujui dokumen pembelian dan menetapkan harga beli satuan.
             </DialogDescription>
           </DialogHeader>
 
@@ -840,7 +840,7 @@ export function PembelianClientView({
                 onChange={(e) => setHargaBeliInput(e.target.value)}
               />
               <p className="text-[11px] text-blue-700">
-                Harga beli ini bersifat rahasia dan akan menjadi Harga Pokok (HPP) saat barang diterima gudang (BR-10).
+                Harga beli ini bersifat rahasia dan akan menjadi dasar perhitungan Harga Pokok Penjualan (HPP).
               </p>
             </div>
 
@@ -868,14 +868,14 @@ export function PembelianClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 3: PENOLAKAN PO OLEH MANAJER (STEP 5.2: BR-09)                      */}
+      {/* MODAL 3: PENOLAKAN PO OLEH MANAJER                                        */}
       {/* ========================================================================= */}
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tolak Pengajuan Pembelian ({selectedPO?.nomor})</DialogTitle>
             <DialogDescription>
-              Penolakan wajib disertai alasan paling sedikit 10 karakter (BR-09).
+              Penolakan pembelian wajib disertai alasan verifikasi paling sedikit 10 karakter.
             </DialogDescription>
           </DialogHeader>
 
@@ -888,7 +888,7 @@ export function PembelianClientView({
                 required
                 minLength={10}
                 rows={3}
-                placeholder="Contoh: Stok masih mencukupi untuk kebutuhan 2 minggu ke depan."
+                placeholder="Contoh: Stok masih mencukupi untuk kebutuhan operasional saat ini."
                 value={alasanTolak}
                 onChange={(e) => setAlasanTolak(e.target.value)}
                 className="w-full text-xs font-medium text-slate-900 rounded-md border border-slate-300 p-2.5 focus:outline-none focus:ring-2 focus:ring-red-600"
@@ -922,14 +922,14 @@ export function PembelianClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 4: PENERIMAAN BARANG PO DI GUDANG (STEP 5.3: BR-10)                 */}
+      {/* MODAL 4: PENERIMAAN BARANG PO DI GUDANG                                   */}
       {/* ========================================================================= */}
       <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Catat Penerimaan Barang ({selectedPO?.nomor})</DialogTitle>
             <DialogDescription>
-              Penerimaan hanya satu kali. Stok gudang akan bertambah dan HPP barang akan otomatis diperbarui (BR-10).
+              Penerimaan hanya dapat dicatat satu kali. Stok fisik gudang dan HPP barang akan otomatis diperbarui.
             </DialogDescription>
           </DialogHeader>
 
@@ -973,7 +973,7 @@ export function PembelianClientView({
                 className="font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
               />
               <p className="text-[11px] text-slate-500">
-                * Jumlah diterima 1 sampai {selectedPO?.jumlah_dipesan} unit. Kekurangan dari pemasok tidak ditunggu. Penerimaan kedua untuk PO yang sama akan ditolak sistem (BR-10).
+                * Catatan: Jumlah diterima 1 sampai {selectedPO?.jumlah_dipesan} unit. Penerimaan barang untuk nomor PO ini bersifat final.
               </p>
             </div>
 

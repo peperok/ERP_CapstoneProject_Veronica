@@ -318,7 +318,7 @@ export function PesananClientView({
 
     const alasan = alasanBatal.trim();
     if (alasan.length < 10) {
-      toast.error("Alasan pembatalan wajib diisi paling sedikit 10 karakter (BR-08).");
+      toast.error("Alasan pembatalan wajib diisi paling sedikit 10 karakter.");
       return;
     }
 
@@ -715,7 +715,7 @@ export function PesananClientView({
             </span>
           </div>
           <p className="text-sm font-medium text-slate-600 mt-1">
-            Pengelolaan alur penjualan barang, konfirmasi plafon kredit, pengiriman gudang, dan pelunasan (BR-02 s/d BR-08).
+            Pengelolaan alur penjualan barang, validasi plafon kredit, pengiriman gudang, dan pelunasan faktur.
           </p>
         </div>
 
@@ -1112,7 +1112,7 @@ export function PesananClientView({
               Konfirmasi Pesanan Jual ({orderToConfirm?.nomor})
             </DialogTitle>
             <DialogDescription>
-              Pesanan draf akan diubah menjadi status terkonfirmasi dan stok fisik barang akan langsung dipotong dari gudang (BR-06).
+              Pesanan draf akan diubah menjadi status terkonfirmasi dan alokasi stok fisik barang akan langsung dikunci di gudang.
             </DialogDescription>
           </DialogHeader>
 
@@ -1140,14 +1140,14 @@ export function PesananClientView({
 
             <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900 space-y-1 text-[11px]">
               <div className="font-bold flex items-center gap-1.5 text-amber-950">
-                <ShieldAlert className="w-4 h-4 text-amber-600" /> Aturan Otomatis Sistem:
+                <ShieldAlert className="w-4 h-4 text-amber-600" /> Verifikasi Otomatis Sistem:
               </div>
               <ul className="list-disc pl-4 space-y-0.5 text-amber-900">
-                <li>Memeriksa apakah pelanggan memiliki tagihan jatuh tempo (BR-05).</li>
-                <li>Memeriksa sisa plafon batas kredit pelanggan (BR-05).</li>
-                <li>Memeriksa ketersediaan stok fisik secara atomik di gudang (BR-06).</li>
+                <li>Memeriksa status riwayat tagihan jatuh tempo pelanggan.</li>
+                <li>Memeriksa ketersediaan sisa plafon batas kredit pelanggan.</li>
+                <li>Memeriksa ketersediaan stok fisik barang di gudang secara real-time.</li>
                 {!isManajer && (
-                  <li>Harga di bawah HPP barang wajib disetujui Manajer (BR-04).</li>
+                  <li>Harga di bawah batas minimum pokok barang memerlukan wewenang Manajer.</li>
                 )}
               </ul>
             </div>
@@ -1196,7 +1196,7 @@ export function PesananClientView({
               Catat Pengiriman Barang ({orderToShip?.nomor})
             </DialogTitle>
             <DialogDescription>
-              Staf Gudang mencatat barang telah diberangkatkan ke toko pelanggan. Tanggal jatuh tempo akan otomatis dihitung (BR-07).
+              Staf Gudang mencatat barang telah diberangkatkan ke toko pelanggan. Tanggal jatuh tempo akan otomatis dihitung sesuai termin.
             </DialogDescription>
           </DialogHeader>
 
@@ -1263,7 +1263,7 @@ export function PesananClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 3: PELUNASAN PESANAN OLEH MANAJER (LANGKAH 6.3: BR-07)              */}
+      {/* MODAL 3: PELUNASAN PESANAN OLEH MANAJER                                   */}
       {/* ========================================================================= */}
       <Dialog open={isSettleOpen} onOpenChange={setIsSettleOpen}>
         <DialogContent className="max-w-md">
@@ -1273,7 +1273,7 @@ export function PesananClientView({
               Catat Pelunasan Pembayaran ({orderToSettle?.nomor})
             </DialogTitle>
             <DialogDescription>
-              Hanya Manajer yang berhak mencatat penerimaan pembayaran dari pelanggan (BR-07).
+              Wewenang Manajer untuk memverifikasi dan mencatat penerimaan pembayaran faktur dari pelanggan.
             </DialogDescription>
           </DialogHeader>
 
@@ -1335,7 +1335,7 @@ export function PesananClientView({
       </Dialog>
 
       {/* ========================================================================= */}
-      {/* MODAL 4: PEMBATALAN PESANAN (LANGKAH 6.3: BR-08)                          */}
+      {/* MODAL 4: PEMBATALAN PESANAN                                               */}
       {/* ========================================================================= */}
       <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
         <DialogContent className="max-w-md">
@@ -1346,7 +1346,7 @@ export function PesananClientView({
             </DialogTitle>
             <DialogDescription>
               {orderToCancel?.status === "dikonfirmasi"
-                ? "Pesanan terkonfirmasi yang dibatalkan Manajer akan otomatis mengembalikan seluruh stok barang ke gudang (BR-08)."
+                ? "Pesanan terkonfirmasi yang dibatalkan akan otomatis mengembalikan alokasi stok barang ke gudang."
                 : "Draf pesanan akan dibatalkan."}
             </DialogDescription>
           </DialogHeader>
