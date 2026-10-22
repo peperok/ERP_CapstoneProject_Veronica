@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -33,6 +36,8 @@ import {
   Eye,
   Calendar,
   AlertCircle,
+  Loader2,
+  ShieldAlert,
 } from "lucide-react";
 
 export interface ItemPesanan {
@@ -85,18 +90,79 @@ interface PesananClientViewProps {
 export function PesananClientView({
   initialOrders,
   userRole,
+  currentUserId,
 }: PesananClientViewProps) {
+  const router = useRouter();
+  const supabase = createClient();
+
   const isManajer = userRole === "manajer";
   const isPenjualan = userRole === "penjualan";
   const canCreate = isManajer || isPenjualan;
 
-  const [orders] = useState<PesananItem[]>(initialOrders);
+  const [orders, setOrders] = useState<PesananItem[]>(initialOrders);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("semua");
 
   // Modal Detail Items
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<PesananItem | null>(null);
+
+  // Modal Konfirmasi Pesanan (Langkah 6.2: BR-04, BR-05, BR-06)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [orderToConfirm, setOrderToConfirm] = useState<PesananItem | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const openConfirmModal = (order: PesananItem) => {
+    setOrderToConfirm(order);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!orderToConfirm) return;
+
+    setIsConfirming(true);
+    try {
+      // Panggil Stored Procedure Atomik: konfirmasi_pesanan_jual (BR-04, BR-05, BR-06)
+      const { data, error } = await supabase.rpc("konfirmasi_pesanan_jual", {
+        p_pesanan_id: orderToConfirm.id,
+        p_pelaku_id: currentUserId,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        setIsConfirming(false);
+        return;
+      }
+
+      if (data && typeof data === "object") {
+        if (!data.success) {
+          toast.error(data.message || "Gagal mengonfirmasi pesanan.");
+          setIsConfirming(false);
+          return;
+        }
+      }
+
+      toast.success(
+        `Pesanan ${orderToConfirm.nomor} berhasil dikonfirmasi! Stok barang telah dipotong dan pesanan kini siap dikirim gudang.`
+      );
+
+      // Perbarui status pesanan di local state
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderToConfirm.id
+            ? { ...o, status: "dikonfirmasi" as const }
+            : o
+        )
+      );
+
+      setIsConfirmOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Terjadi kesalahan saat konfirmasi pesanan.");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   const filteredOrders = orders.filter((o) => {
     const matchSearch =
@@ -356,14 +422,25 @@ export function PesananClientView({
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openDetailModal(order)}
-                        className="h-8 px-2.5 text-xs text-slate-800 hover:text-blue-700 border-slate-300 font-bold flex items-center gap-1"
-                      >
-                        <Eye className="h-3.5 w-3.5" /> Detail
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {order.status === "draf" && canCreate && (
+                          <Button
+                            size="sm"
+                            onClick={() => openConfirmModal(order)}
+                            className="h-8 px-2.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Konfirmasi
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDetailModal(order)}
+                          className="h-8 px-2.5 text-xs text-slate-800 hover:text-blue-700 border-slate-300 font-bold flex items-center gap-1"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Detail
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -475,6 +552,90 @@ export function PesananClientView({
               className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
             >
               Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL KONFIRMASI PESANAN JUAL (LANGKAH 6.2: BR-04, BR-05, BR-06)          */}
+      {/* ========================================================================= */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              Konfirmasi Pesanan Jual ({orderToConfirm?.nomor})
+            </DialogTitle>
+            <DialogDescription>
+              Pesanan draf akan diubah menjadi status terkonfirmasi dan stok fisik barang akan langsung dipotong dari gudang (BR-06).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2 text-xs">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Toko Pelanggan:</span>
+                <span className="font-bold text-slate-900">{orderToConfirm?.pelanggan?.nama_toko}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Batas Plafon Kredit:</span>
+                <span className="font-bold text-slate-900">{formatRupiah(orderToConfirm?.pelanggan?.batas_kredit || 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Jumlah Baris Item:</span>
+                <span className="font-bold text-slate-900">{orderToConfirm?.items?.length || 0} barang</span>
+              </div>
+              <div className="flex justify-between border-t border-slate-200 pt-2">
+                <span className="text-slate-700 font-bold">Total Nilai Pesanan:</span>
+                <span className="font-black text-blue-900 text-sm">
+                  {orderToConfirm ? formatRupiah(orderToConfirm.total) : "Rp0"}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900 space-y-1 text-[11px]">
+              <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                <ShieldAlert className="w-4 h-4 text-amber-600" /> Aturan Otomatis Sistem:
+              </div>
+              <ul className="list-disc pl-4 space-y-0.5 text-amber-900">
+                <li>Memeriksa apakah pelanggan memiliki tagihan jatuh tempo (BR-05).</li>
+                <li>Memeriksa sisa plafon batas kredit pelanggan (BR-05).</li>
+                <li>Memeriksa ketersediaan stok fisik secara atomik di gudang (BR-06).</li>
+                {!isManajer && (
+                  <li>Harga di bawah HPP barang wajib disetujui Manajer (BR-04).</li>
+                )}
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isConfirming}
+              onClick={() => setIsConfirmOpen(false)}
+              className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isConfirming}
+              onClick={handleConfirmOrder}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-sm"
+            >
+              {isConfirming ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Memproses...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Ya, Konfirmasi Pesanan
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -81,7 +81,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 
 ### Tahap 6: Modul Pesanan Jual (Sales Order) & Alur Transaksi
 
-- [ ] **6.1. Pembuatan Draf Pesanan**
+- [x] **6.1. Pembuatan Draf Pesanan**
   - Form dinamis multi-baris (1-20 baris), validasi diskon per baris (Sales max 10%, Manajer max 25%) (BR-02, BR-03).
 - [ ] **6.2. Konfirmasi Pesanan**
   - Validasi limit kredit & tagihan jatuh tempo (BR-05).
