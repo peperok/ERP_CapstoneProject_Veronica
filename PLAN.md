@@ -96,8 +96,8 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 
 ### Tahap 7: Modul Laporan, Audit Log & Fitur Nilai Tambah
 
-- [ ] **7.1. Laporan Manajer**
-  - Grafik omzet & margin 8 minggu terakhir, tabel top margin barang, tabel aging piutang, ekspor CSV.
+- [x] **7.1. Laporan Manajer**
+  - Grafik omzet & margin 8 minggu terakhir, tabel top margin barang, tabel aging piutang, modal ekspor multi-sheet Excel (.xlsx), PDF resmi A4, & CSV.
 - [ ] **7.2. Audit Log Sistem**
   - Daftar riwayat perubahan data sensitif (before/after values) (BR-12).
 - [ ] **7.3. Fitur Nilai Tambah**
