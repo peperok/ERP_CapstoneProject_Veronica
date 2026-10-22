@@ -87,7 +87,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
   - Validasi limit kredit & tagihan jatuh tempo (BR-05).
   - Validasi harga di bawah harga pokok (BR-04).
   - Pengurangan stok atomik & perlindungan race condition (BR-06).
-- [ ] **6.3. Pengiriman & Pelunasan**
+- [x] **6.3. Pengiriman & Pelunasan**
   - Pengiriman pesanan oleh Gudang (menghitung jatuh tempo otomatis) (BR-07).
   - Pembatalan pesanan terkonfirmasi oleh Manajer (alasan min. 10 karakter & stok kembali) (BR-08).
   - Pencatatan pelunasan oleh Manajer (BR-07).
