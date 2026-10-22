@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { formatRupiah } from "@/lib/utils";
+import * as XLSX from "xlsx";
+import { formatRupiah, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,6 +14,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   BarChart3,
   TrendingUp,
   DollarSign,
@@ -22,6 +31,11 @@ import {
   Calendar,
   AlertTriangle,
   Building2,
+  FileSpreadsheet,
+  FileText,
+  Printer,
+  CheckCircle2,
+  FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,6 +94,7 @@ export function LaporanClientView({
   pelangganList,
 }: LaporanClientViewProps) {
   const [activeTab, setActiveTab] = useState<"omzet" | "topBarang" | "aging">("omzet");
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // ============================================================================
   // 1. KALKULASI METRIK EKSEKUTIF UTAMA
@@ -272,7 +287,300 @@ export function LaporanClientView({
   }, [pelangganList, orders]);
 
   // ============================================================================
-  // 5. FITUR EKSPOR CSV
+  // 5. FITUR EKSPOR EXCEL MULTI-SHEET (.XLSX)
+  // ============================================================================
+  const handleExportExcel = () => {
+    try {
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1: Ringkasan Kinerja & Tren 8 Minggu
+      const summaryRows = [
+        ["LAPORAN KINERJA FINANSIAL & PIUTANG - CV SINAR ABADI NIAGA"],
+        [`Tanggal Unduh: ${new Date().toLocaleDateString("id-ID")} ${new Date().toLocaleTimeString("id-ID")}`],
+        [""],
+        ["METRIK UTAMA", "NILAI"],
+        ["Total Omzet Penjualan Bersih", totalOmzet],
+        ["Total Biaya Pokok (HPP Modal)", totalHPP],
+        ["Total Laba Kotor (Gross Margin)", totalMargin],
+        ["Margin Rata-rata (%)", `${marginPersen.toFixed(2)}%`],
+        ["Total Piutang Berjalan", totalPiutang],
+        [""],
+        ["TREN OMZET & MARGIN 8 MINGGU TERAKHIR"],
+        ["Periode Minggu", "Omzet Bersih (Rp)", "Laba Kotor (Rp)", "Margin (%)"],
+        ...weeklyData.map((w) => [
+          w.label,
+          w.omzet,
+          w.margin,
+          w.omzet > 0 ? `${((w.margin / w.omzet) * 100).toFixed(1)}%` : "0%",
+        ]),
+      ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+      wsSummary["!cols"] = [{ wch: 35 }, { wch: 25 }, { wch: 20 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan & Tren");
+
+      // Sheet 2: Top 10 Barang Margin
+      const topBarangRows = [
+        ["TOP 10 BARANG PENYUMBANG MARGIN TERTINGGI - CV SINAR ABADI NIAGA"],
+        [""],
+        ["Peringkat", "Kode Barang", "Nama Barang", "Volume Terjual", "Satuan", "Total Omzet (Rp)", "Total Margin (Rp)", "Margin (%)"],
+        ...topBarangData.map((b, idx) => [
+          idx + 1,
+          b.kode,
+          b.nama,
+          b.qty,
+          b.satuan,
+          b.omzet,
+          b.margin,
+          b.omzet > 0 ? `${((b.margin / b.omzet) * 100).toFixed(1)}%` : "0%",
+        ]),
+      ];
+      const wsTopBarang = XLSX.utils.aoa_to_sheet(topBarangRows);
+      wsTopBarang["!cols"] = [
+        { wch: 10 },
+        { wch: 12 },
+        { wch: 35 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 12 },
+      ];
+      XLSX.utils.book_append_sheet(wb, wsTopBarang, "Top 10 Barang Margin");
+
+      // Sheet 3: Aging Schedule Piutang Pelanggan
+      const agingRows = [
+        ["AGING SCHEDULE PIUTANG PELANGGAN (UMUR PIUTANG) - CV SINAR ABADI NIAGA"],
+        [""],
+        ["Kode", "Toko Pelanggan", "Termin", "Plafon Kredit (Rp)", "Lancar / Belum JT (Rp)", "1-30 Hari (Rp)", "31-60 Hari (Rp)", ">60 Hari (Rp)", "Total Piutang (Rp)", "Status Tagihan"],
+        ...agingData.map((p) => [
+          p.kode,
+          p.nama_toko,
+          `${p.termin_hari} Hari`,
+          p.batas_kredit,
+          p.current,
+          p.d1to30,
+          p.d31to60,
+          p.dOver60,
+          p.totalPiutang,
+          p.hasOverdue ? "Ada Tunggakan" : p.totalPiutang > 0 ? "Lancar" : "Lunas",
+        ]),
+      ];
+      const wsAging = XLSX.utils.aoa_to_sheet(agingRows);
+      wsAging["!cols"] = [
+        { wch: 10 },
+        { wch: 30 },
+        { wch: 12 },
+        { wch: 20 },
+        { wch: 22 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 20 },
+        { wch: 16 },
+      ];
+      XLSX.utils.book_append_sheet(wb, wsAging, "Aging Piutang");
+
+      // Download file
+      const fileName = `Laporan_Keuangan_CV_Sinar_Abadi_${new Date().toISOString().split("T")[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      toast.success("Buku kerja Excel (.xlsx) dengan 3 sheet berhasil diunduh!");
+      setIsExportModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || "Gagal membuat file Excel.");
+    }
+  };
+
+  // ============================================================================
+  // 6. FITUR CETAK / EKSPOR PDF RESMI (KOP SURAT A4)
+  // ============================================================================
+  const handlePrintPDF = () => {
+    try {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        toast.error("Gagal membuka jendela cetak. Pastikan pop-up diizinkan browser.");
+        return;
+      }
+
+      const currentDate = new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Laporan Keuangan & Piutang - CV Sinar Abadi Niaga</title>
+          <style>
+            @page { size: A4; margin: 15mm; }
+            body { font-family: Arial, sans-serif; color: #1e293b; line-height: 1.4; font-size: 11px; }
+            .header-kop { border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+            .kop-title { font-size: 16px; font-weight: bold; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; }
+            .kop-sub { font-size: 10px; color: #475569; margin-top: 2px; }
+            .doc-info { text-align: right; font-size: 9px; color: #64748b; }
+            h2 { font-size: 12px; margin-top: 15px; margin-bottom: 6px; color: #0f172a; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; }
+            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
+            .kpi-box { border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; background: #f8fafc; }
+            .kpi-label { font-size: 9px; color: #64748b; font-weight: bold; }
+            .kpi-value { font-size: 13px; font-weight: bold; color: #0f172a; margin-top: 2px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 10px; }
+            th { background: #f1f5f9; color: #0f172a; font-weight: bold; text-align: left; padding: 5px 6px; border: 1px solid #cbd5e1; }
+            td { padding: 4px 6px; border: 1px solid #cbd5e1; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            .badge-warning { background: #fee2e2; color: #991b1b; padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 8px; }
+            .badge-success { background: #dcfce7; color: #166534; padding: 1px 4px; border-radius: 3px; font-weight: bold; font-size: 8px; }
+            .footer-ttd { display: flex; justify-content: flex-end; margin-top: 30px; }
+            .ttd-box { text-align: center; width: 200px; font-size: 10px; }
+            .ttd-space { height: 50px; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header-kop">
+            <div>
+              <div class="kop-title">CV Sinar Abadi Niaga</div>
+              <div class="kop-sub">Distributor Bahan Pokok & FMCG | Sistem Informasi ERP Terpadu</div>
+            </div>
+            <div class="doc-info">
+              <div><strong>LAPORAN RESMI KEUANGAN</strong></div>
+              <div>Tanggal: ${currentDate}</div>
+              <div>Klasifikasi: RAHASIA MANAJER (BR-12)</div>
+            </div>
+          </div>
+
+          <!-- KPI METRICS -->
+          <div class="kpi-grid">
+            <div class="kpi-box">
+              <div class="kpi-label">TOTAL OMZET BERSIH</div>
+              <div class="kpi-value">${formatRupiah(totalOmzet)}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">TOTAL BIAYA HPP MODAL</div>
+              <div class="kpi-value">${formatRupiah(totalHPP)}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">TOTAL LABA KOTOR (MARGIN)</div>
+              <div class="kpi-value" style="color: #15803d;">${formatRupiah(totalMargin)} (${marginPersen.toFixed(1)}%)</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">TOTAL PIUTANG BERJALAN</div>
+              <div class="kpi-value" style="color: #1d4ed8;">${formatRupiah(totalPiutang)}</div>
+            </div>
+          </div>
+
+          <!-- TABEL 1: TOP 10 PRODUK MARGIN -->
+          <h2>1. 10 Barang Penyumbang Margin Keuntungan Tertinggi</h2>
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 30px;">No</th>
+                <th>Kode</th>
+                <th>Nama Barang</th>
+                <th class="text-center">Volume</th>
+                <th class="text-right">Total Omzet</th>
+                <th class="text-right">Total Laba Kotor</th>
+                <th class="text-center">Margin %</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topBarangData
+                .map(
+                  (b, idx) => `
+                <tr>
+                  <td class="text-center">${idx + 1}</td>
+                  <td>${b.kode}</td>
+                  <td><strong>${b.nama}</strong></td>
+                  <td class="text-center">${b.qty} ${b.satuan}</td>
+                  <td class="text-right">${formatRupiah(b.omzet)}</td>
+                  <td class="text-right" style="font-weight: bold; color: #15803d;">${formatRupiah(b.margin)}</td>
+                  <td class="text-center">${b.omzet > 0 ? ((b.margin / b.omzet) * 100).toFixed(1) : 0}%</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+
+          <!-- TABEL 2: AGING SCHEDULE PIUTANG -->
+          <h2>2. Aging Schedule Piutang Dagang Pelanggan</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Toko Pelanggan</th>
+                <th class="text-right">Plafon Kredit</th>
+                <th class="text-right">Lancar (Belum JT)</th>
+                <th class="text-right">1 - 30 Hari</th>
+                <th class="text-right">31 - 60 Hari</th>
+                <th class="text-right">&gt; 60 Hari</th>
+                <th class="text-right">Total Piutang</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${agingData
+                .map(
+                  (p) => `
+                <tr>
+                  <td><strong>${p.nama_toko}</strong> (${p.termin_hari} hr)</td>
+                  <td class="text-right">${formatRupiah(p.batas_kredit)}</td>
+                  <td class="text-right" style="color: #15803d;">${p.current > 0 ? formatRupiah(p.current) : "-"}</td>
+                  <td class="text-right">${p.d1to30 > 0 ? formatRupiah(p.d1to30) : "-"}</td>
+                  <td class="text-right">${p.d31to60 > 0 ? formatRupiah(p.d31to60) : "-"}</td>
+                  <td class="text-right" style="color: #b91c1c; font-weight: bold;">${p.dOver60 > 0 ? formatRupiah(p.dOver60) : "-"}</td>
+                  <td class="text-right" style="font-weight: bold;">${p.totalPiutang > 0 ? formatRupiah(p.totalPiutang) : "Rp0"}</td>
+                  <td class="text-center">
+                    ${
+                      p.hasOverdue
+                        ? '<span class="badge-warning">TUNGGAKAN</span>'
+                        : p.totalPiutang > 0
+                        ? '<span class="badge-success">LANCAR</span>'
+                        : '<span style="color: #94a3b8;">LUNAS</span>'
+                    }
+                  </td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+
+          <!-- TANDA TANGAN -->
+          <div class="footer-ttd">
+            <div class="ttd-box">
+              <div>Bekasi, ${currentDate}</div>
+              <div>Disetujui oleh,</div>
+              <div class="ttd-space"></div>
+              <div style="font-weight: bold; text-decoration: underline;">Hendra Wijaya</div>
+              <div style="color: #64748b;">Manajer Operasional & Keuangan</div>
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      setIsExportModalOpen(false);
+      toast.success("Jendela cetak / Simpan PDF resmi telah dibuka.");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memproses dokumen PDF.");
+    }
+  };
+
+  // ============================================================================
+  // 7. FITUR EKSPOR CSV
   // ============================================================================
   const handleExportCSV = () => {
     try {
@@ -314,6 +622,7 @@ export function LaporanClientView({
       document.body.removeChild(link);
 
       toast.success("Laporan Keuangan & Piutang berhasil diekspor ke CSV!");
+      setIsExportModalOpen(false);
     } catch (err: any) {
       toast.error(err.message || "Gagal mengekspor laporan.");
     }
@@ -338,10 +647,10 @@ export function LaporanClientView({
         </div>
 
         <Button
-          onClick={handleExportCSV}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm flex items-center gap-2"
+          onClick={() => setIsExportModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm flex items-center gap-2"
         >
-          <Download className="h-4 w-4" /> Ekspor Laporan CSV
+          <Download className="h-4 w-4" /> Ekspor & Cetak Laporan
         </Button>
       </div>
 
@@ -640,6 +949,106 @@ export function LaporanClientView({
           </Table>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL POP-UP PILIHAN FORMAT EKSPOR & CETAK LAPORAN                       */}
+      {/* ========================================================================= */}
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900 text-base">
+              <Download className="w-5 h-5 text-blue-600" />
+              Pilih Format Ekspor & Cetak Laporan
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Pilih salah satu format laporan di bawah sesuai dengan kebutuhan analisis Anda (Data bersifat Rahasia Manajer - BR-12).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-3 py-3">
+            {/* KARTU 1: EXCEL (.XLSX) */}
+            <div
+              onClick={handleExportExcel}
+              className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-500 hover:bg-emerald-50/40 transition-all cursor-pointer group flex items-start gap-3 shadow-2xs"
+            >
+              <div className="p-2.5 rounded-lg bg-emerald-100 text-emerald-800 group-hover:scale-105 transition-transform">
+                <FileSpreadsheet className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">
+                    Microsoft Excel (.xlsx)
+                  </h3>
+                  <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                    Multi-Sheet
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Buku kerja Excel dengan 3 sheet terpisah: <strong>Ringkasan KPI</strong>, <strong>Top 10 Barang</strong>, dan <strong>Aging Piutang</strong> yang sudah terformat rapi.
+                </p>
+              </div>
+            </div>
+
+            {/* KARTU 2: PDF RESMI (A4 PRINT) */}
+            <div
+              onClick={handlePrintPDF}
+              className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50/40 transition-all cursor-pointer group flex items-start gap-3 shadow-2xs"
+            >
+              <div className="p-2.5 rounded-lg bg-blue-100 text-blue-800 group-hover:scale-105 transition-transform">
+                <Printer className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-slate-900 group-hover:text-blue-900">
+                    Dokumen Resmi PDF / Cetak (A4)
+                  </h3>
+                  <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                    Siap Cetak
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Format dokumen siap cetak atau <em>Save as PDF</em> lengkap dengan <strong>Kop Surat CV Sinar Abadi Niaga</strong>, tabel formal, dan kolom tanda tangan manajer.
+                </p>
+              </div>
+            </div>
+
+            {/* KARTU 3: CSV TABULAR */}
+            <div
+              onClick={handleExportCSV}
+              className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-500 hover:bg-slate-50 transition-all cursor-pointer group flex items-start gap-3 shadow-2xs"
+            >
+              <div className="p-2.5 rounded-lg bg-slate-100 text-slate-800 group-hover:scale-105 transition-transform">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-slate-900 group-hover:text-slate-950">
+                    Data Tabular CSV (.csv)
+                  </h3>
+                  <span className="text-[10px] font-black bg-slate-200 text-slate-800 px-2 py-0.5 rounded">
+                    Kompatibel
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Format teks tabular standar yang ringan dan mudah diintegrasikan dengan sistem pengolahan data lain.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExportModalOpen(false)}
+              className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+            >
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
