@@ -1,7 +1,6 @@
 "use client";
 
-import { LogOut, UserCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, Calendar, Download, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/erp";
 
@@ -16,49 +15,53 @@ export function Header({
   userName = "Pengguna",
   userEmail = "user@sinarabadi.test",
   userRole = "Manajer",
-  onLogout,
 }: HeaderProps) {
+  // Format tanggal hari ini (contoh: "Today | 23 Okt 2026")
+  const todayFormatted = new Date().toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+      {/* Sapaan Personal (Gaya Gambar 1: Welcome back, ...) */}
       <div>
-        <span className="text-sm font-medium text-slate-500">
-          Selamat datang kembali,
-        </span>{" "}
-        <span className="text-sm font-semibold text-slate-900">{userName}</span>
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+            Selamat datang kembali, {userName.split(" ")[0]}!
+          </h1>
+          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Online
+          </span>
+        </div>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">
+          Berikut ringkasan operasional distribusi kebutuhan pokok hari ini.
+        </p>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Widget Sisi Kanan: Tanggal + Peran Badge + Notifikasi */}
+      <div className="flex items-center gap-3">
+        {/* Date Pill Widget (Gaya Gambar 1) */}
+        <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-medium shadow-2xs">
+          <Calendar className="w-3.5 h-3.5 text-slate-500" />
+          <span>{todayFormatted}</span>
+        </div>
+
+        {/* Role Badge (Clean Pill) */}
         <Badge
-          variant={
+          className={
             userRole === "Manajer"
-              ? "default"
+              ? "bg-purple-100 text-purple-800 border-purple-200 font-bold px-3 py-1 text-xs"
               : userRole === "Staf Penjualan"
-              ? "secondary"
-              : "outline"
+              ? "bg-blue-100 text-blue-800 border-blue-200 font-bold px-3 py-1 text-xs"
+              : "bg-amber-100 text-amber-800 border-amber-200 font-bold px-3 py-1 text-xs"
           }
-          className="text-xs font-semibold px-2.5 py-1"
         >
           {userRole}
         </Badge>
-
-        <div className="h-4 w-px bg-slate-200" />
-
-        <div className="flex items-center gap-2 text-slate-700">
-          <UserCircle className="h-5 w-5 text-slate-400" />
-          <span className="text-xs text-slate-600 hidden sm:inline-block">
-            {userEmail}
-          </span>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onLogout}
-          className="text-slate-600 hover:text-red-600 hover:bg-red-50 flex items-center gap-1.5"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Keluar</span>
-        </Button>
       </div>
     </header>
   );

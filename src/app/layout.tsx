@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${inter.className} bg-slate-50 text-slate-900 min-h-screen antialiased`}>
+      <body className={`${inter.className} bg-white text-slate-900 min-h-screen antialiased`}>
         {children}
         <Toaster position="top-right" richColors />
       </body>

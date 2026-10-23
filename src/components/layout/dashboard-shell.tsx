@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -21,6 +22,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const router = useRouter();
   const supabase = createClient();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -28,20 +30,33 @@ export function DashboardShell({
     router.refresh();
   };
 
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar Navigasi Adaptif Peran */}
-      <Sidebar userRole={userRole} />
+    <div className="flex min-h-screen bg-white antialiased text-slate-900">
+      {/* Sidebar Navigasi Collapsible (Full / Mini Icon Mode) */}
+      <Sidebar
+        userRole={userRole}
+        userName={userName}
+        userEmail={userEmail}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={handleToggleCollapse}
+        onLogout={handleLogout}
+      />
 
       {/* Konten Utama */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
         <Header
           userName={userName}
           userEmail={userEmail}
           userRole={userRole}
           onLogout={handleLogout}
         />
-        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-5 sm:p-7 overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
