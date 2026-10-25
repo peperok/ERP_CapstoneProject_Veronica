@@ -103,6 +103,7 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 - [x] **7.3. Fitur Nilai Tambah**
   - [x] Cetak surat jalan pengemudi (Delivery Order tanpa harga, tabel verifikasi fisik & 3 blok tanda tangan: Gudang, Sopir, Toko - BR-12).
   - [x] Notifikasi email stok menipis via Resend API (alert button di master barang, email HTML responsif, rincian defisit stok).
+  - [x] Tautan bayar piutang via Mayar Sandbox & QRIS Dinamis (modal pop-up QRIS, tombol salin tautan, pengiriman faktur otomatis via WhatsApp toko, dan simulator webhook `payment.received` - Bab 11 PRD).
 
 ---
 
