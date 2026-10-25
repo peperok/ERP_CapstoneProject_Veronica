@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,7 +17,6 @@ import {
   Search,
   PanelLeftClose,
   PanelLeftOpen,
-  Moon,
   MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -94,33 +93,6 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Sync dark mode state from localStorage and HTML class
-  useEffect(() => {
-    const saved = localStorage.getItem("sinarabadi_theme");
-    if (saved === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
-  const handleToggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("sinarabadi_theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("sinarabadi_theme", "light");
-      }
-      return next;
-    });
-  };
 
   const filteredNavItems = navItems.filter((item) => {
     const roleAllowed = item.roles.includes(userRole);
@@ -268,44 +240,8 @@ export function Sidebar({
         })}
       </nav>
 
-      {/* 4. AREA BAWAH PERSIS YUZO: DARK MODE TOGGLE & PENGATURAN/LOGOUT */}
+      {/* 4. AREA BAWAH: LOGOUT & PROFIL */}
       <div className="p-3 border-t border-slate-100 space-y-2">
-        {/* Toggle Dark Mode (Persis Gambar YUZO) */}
-        {!isCollapsed ? (
-          <div className="flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-slate-600">
-            <div className="flex items-center gap-2.5">
-              <Moon className="h-4 w-4 text-slate-400" />
-              <span>Dark Mode</span>
-            </div>
-            {/* Switch Toggle */}
-            <button
-              onClick={handleToggleDarkMode}
-              type="button"
-              className={cn(
-                "w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer",
-                isDarkMode ? "bg-indigo-600" : "bg-slate-200"
-              )}
-            >
-              <div
-                className={cn(
-                  "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform",
-                  isDarkMode ? "translate-x-4" : "translate-x-0"
-                )}
-              />
-            </button>
-          </div>
-        ) : (
-          <div className="flex justify-center py-1">
-            <button
-              onClick={handleToggleDarkMode}
-              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              className="p-2 text-slate-400 hover:text-indigo-400 rounded-xl hover:bg-slate-100 transition-colors"
-            >
-              <Moon className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
         {/* Menu Logout (Menggantikan Settings persis YUZO) */}
         {onLogout && !isCollapsed && (
           <button

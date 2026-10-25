@@ -108,9 +108,9 @@ Dokumen ini memuat tahapan terstruktur pengerjaan Capstone Project sesuai petunj
 
 ### Tahap 8: Pengujian (20 Test Case), Polish & Deployment ke Netlify
 
-- [ ] **8.1. Eksekusi 20 Test Case Aturan Bisnis**
-  - Verifikasi seluruh skenario pengujian di `docs/test-plan.md`.
-- [ ] **8.2. Audit Keamanan & SEO**
-  - Tag meta `noindex` pada semua halaman, audit secret di repo.
-- [ ] **8.3. Deployment ke Netlify & Pengujian Akhir URL Live**
-  - Pengujian login 3 peran akun uji pada URL produksi Netlify.
+- [x] **8.1. Eksekusi 20 Test Case Aturan Bisnis**
+  - Verifikasi seluruh skenario pengujian di `docs/test-plan.md` dan pembukuan hasil di `docs/test-report.md` (100% PASSED: TC-01 s/d TC-20).
+- [x] **8.2. Audit Keamanan & SEO**
+  - Tag meta `robots: { index: false, follow: false }` pada `layout.tsx` untuk sistem ERP internal, perlindungan kredensial `.env.local` / `.gitignore`, dan penyaringan HPP untuk non-Manajer.
+- [x] **8.3. Deployment ke Netlify & Pengujian Akhir URL Live**
+  - Aplikasi berhasil di-deploy ke Netlify oleh pengguna dengan build Next.js 16 App Router sukses dan database Supabase aktif.

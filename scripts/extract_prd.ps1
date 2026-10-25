@@ -1,0 +1,13 @@
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead('PRD_ERP.docx')
+$entry = $zip.GetEntry('word/document.xml')
+$stream = $entry.Open()
+$reader = New-Object System.IO.StreamReader($stream)
+$xml = $reader.ReadToEnd()
+$reader.Close()
+$stream.Close()
+$zip.Dispose()
+$clean = [System.Text.RegularExpressions.Regex]::Replace($xml, '<[^>]+>', ' ')
+$clean = [System.Text.RegularExpressions.Regex]::Replace($clean, '\s+', ' ')
+[System.IO.File]::WriteAllText('docs/extracted_prd.txt', $clean, [System.Text.Encoding]::UTF8)
+Write-Output ("Done. Length: " + $clean.Length)
