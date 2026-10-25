@@ -1564,22 +1564,22 @@ export function PesananClientView({
       {/* MODAL 5: TAUTAN BAYAR & QRIS MAYAR SANDBOX (Bab 11 PRD)                   */}
       {/* ========================================================================= */}
       <Dialog open={isMayarOpen} onOpenChange={setIsMayarOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <div className="h-8 w-8 rounded-lg bg-violet-100 flex items-center justify-center text-violet-700 font-black text-sm">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-5">
+          <DialogHeader className="pb-1">
+            <DialogTitle className="flex items-center gap-2 text-slate-900 text-base">
+              <div className="h-7 w-7 rounded-lg bg-violet-100 flex items-center justify-center text-violet-700 font-black text-xs">
                 M
               </div>
               Tagihan Digital Mayar ({orderToMayar?.nomor})
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs">
               Tautan pembayaran instan & QRIS Dinamis Mayar Sandbox untuk toko pelanggan.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-3 py-1">
             {/* Kartu Ringkasan Tagihan */}
-            <div className="bg-gradient-to-br from-violet-50 to-indigo-50/50 p-3.5 rounded-2xl border border-violet-100 space-y-2 text-xs">
+            <div className="bg-gradient-to-br from-violet-50 to-indigo-50/50 p-3 rounded-xl border border-violet-100 space-y-1.5 text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-medium">Pelanggan:</span>
                 <span className="font-bold text-slate-900">{orderToMayar?.pelanggan?.nama_toko}</span>
@@ -1590,19 +1590,19 @@ export function PesananClientView({
                   {orderToMayar?.jatuh_tempo ? formatDate(orderToMayar.jatuh_tempo) : "-"}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-t border-violet-200/60 pt-2">
+              <div className="flex justify-between items-center border-t border-violet-200/60 pt-1.5">
                 <span className="text-violet-900 font-bold">Total Pembayaran:</span>
-                <span className="font-black text-violet-700 text-base">
+                <span className="font-black text-violet-700 text-sm">
                   {orderToMayar ? formatRupiah(orderToMayar.total) : "Rp0"}
                 </span>
               </div>
             </div>
 
-            {/* Mock QRIS Mayar */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-2 flex items-center justify-center">
+            {/* Mock QRIS Mayar (Compact Size) */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg mb-1.5 flex items-center justify-center">
                 <svg
-                  className="w-36 h-36 text-slate-900"
+                  className="w-24 h-24 text-slate-900"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -1625,31 +1625,31 @@ export function PesananClientView({
                 </svg>
               </div>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200">
-                <QrCode className="w-3 h-3" /> QRIS Mayar Dinamis
+                <QrCode className="w-2.5 h-2.5" /> QRIS Mayar Dinamis
               </span>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[10px] text-slate-400 mt-0.5">
                 Scan via BCA, Mandiri, GoPay, OVO, atau ShopeePay
               </p>
             </div>
 
             {/* Input Link Mayar & Action Buttons */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-900">Tautan Pembayaran (Payment Link):</label>
-              <div className="flex items-center gap-2">
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-900">Tautan Pembayaran (Payment Link):</label>
+              <div className="flex items-center gap-1.5">
                 <input
                   type="text"
                   readOnly
                   value={getMayarLink(orderToMayar)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 font-mono select-all focus:outline-none"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-600 font-mono select-all focus:outline-none"
                 />
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={handleCopyLink}
-                  className="h-8 px-2.5 text-xs flex items-center gap-1 font-bold border-slate-200 text-slate-700"
+                  className="h-7 px-2 text-xs flex items-center gap-1 font-bold border-slate-200 text-slate-700"
                 >
-                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                   {copiedLink ? "Tersalin" : "Salin"}
                 </Button>
               </div>
@@ -1659,9 +1659,9 @@ export function PesananClientView({
             <Button
               type="button"
               onClick={handleSendWhatsAppBill}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 flex items-center justify-center gap-2 shadow-xs"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-8 flex items-center justify-center gap-1.5 shadow-xs"
             >
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare className="w-3.5 h-3.5" />
               Kirim Tagihan & Link ke WhatsApp Toko
             </Button>
 
@@ -1672,7 +1672,7 @@ export function PesananClientView({
                 variant="outline"
                 disabled={isSimulatingMayar}
                 onClick={handleSimulateMayarPayment}
-                className="w-full border-dashed border-violet-300 bg-violet-50/60 hover:bg-violet-100/70 text-violet-800 font-bold text-xs h-9 flex items-center justify-center gap-2"
+                className="w-full border-dashed border-violet-300 bg-violet-50/70 hover:bg-violet-100 text-violet-800 font-bold text-xs h-8 flex items-center justify-center gap-1.5"
               >
                 {isSimulatingMayar ? (
                   <>
@@ -1691,13 +1691,13 @@ export function PesananClientView({
             </div>
           </div>
 
-          <DialogFooter className="pt-2">
+          <DialogFooter className="pt-1">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsMayarOpen(false)}
-              className="border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
+              className="h-8 border-slate-300 text-slate-800 font-bold hover:bg-slate-100"
             >
               Tutup
             </Button>
