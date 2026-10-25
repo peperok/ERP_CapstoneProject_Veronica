@@ -35,8 +35,8 @@ export function DashboardShell({
   };
 
   return (
-    <div className="flex min-h-screen bg-white antialiased text-slate-900">
-      {/* Sidebar Navigasi Collapsible (Full / Mini Icon Mode) */}
+    <div className="flex h-screen overflow-hidden bg-white antialiased text-slate-900">
+      {/* Sidebar Navigasi Collapsible (Full / Mini Icon Mode) - Selalu menempel (Fixed/Sticky) */}
       <Sidebar
         userRole={userRole}
         userName={userName}
@@ -46,15 +46,15 @@ export function DashboardShell({
         onLogout={handleLogout}
       />
 
-      {/* Konten Utama */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+      {/* Area Konten Utama (Scrollable Vertikal secara mandiri) */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto transition-all duration-300">
         <Header
           userName={userName}
           userEmail={userEmail}
           userRole={userRole}
           onLogout={handleLogout}
         />
-        <main className="flex-1 p-5 sm:p-7 overflow-y-auto">
+        <main className="flex-1 p-5 sm:p-7">
           {children}
         </main>
       </div>
