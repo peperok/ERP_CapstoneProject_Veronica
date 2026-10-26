@@ -3,6 +3,7 @@
 import { Bell, Calendar, Download, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/erp";
+import { AIExecutiveInsight } from "@/components/dashboard/ai-executive-insight";
 
 interface HeaderProps {
   userName?: string;
@@ -42,8 +43,8 @@ export function Header({
         </p>
       </div>
 
-      {/* Widget Sisi Kanan: Tanggal + Peran Badge + Notifikasi */}
-      <div className="flex items-center gap-3">
+      {/* Widget Sisi Kanan: Tanggal + Peran Badge + AI Copilot */}
+      <div className="flex items-center gap-2.5">
         {/* Date Pill Widget (Gaya Gambar 1) */}
         <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-medium shadow-2xs">
           <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -62,6 +63,9 @@ export function Header({
         >
           {userRole}
         </Badge>
+
+        {/* AI Copilot Button (Tersedia untuk semua peran: Manajer, Penjualan, Gudang) */}
+        <AIExecutiveInsight />
       </div>
     </header>
   );

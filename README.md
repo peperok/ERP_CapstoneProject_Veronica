@@ -21,6 +21,7 @@ Sistem ini memastikan:
 2. **Kepatuhan Aturan Bisnis**: Otomatisasi pembatasan kredit (BR-05), verifikasi diskon (BR-03), dan persetujuan khusus harga di bawah HPP (BR-04).
 3. **Kerahasiaan Data (RBAC)**: Harga beli, HPP, dan margin hanya dapat diakses oleh Manajer (BR-12).
 4. **Audit Trail Lengkap**: Seluruh mutasi stok dan manipulasi data krusial tercatat di kartu stok dan audit log (BR-11, BR-12).
+5. **AI Executive Assistant & Insights**: Analisis cerdas real-time pada dashboard Manajer untuk sintesis performa penjualan, margin kotor, deteksi risiko tagihan jatuh tempo, dan rekomendasi restok barang prioritas.
 
 ---
 
