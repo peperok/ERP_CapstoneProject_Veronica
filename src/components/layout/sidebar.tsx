@@ -117,7 +117,7 @@ export function Sidebar({
     >
       {/* 1. BRAND HEADER DENGAN TOMBOL CIUTKAN DI SEBELAH LOGO (PERSIS YUZO) */}
       <div className={cn(
-        "h-16 px-4 border-b border-slate-100 flex items-center transition-all",
+        "h-20 px-4 border-b border-slate-100 flex items-center transition-all",
         isCollapsed ? "justify-center" : "justify-between"
       )}>
         <Link href="/" className="flex items-center gap-3 group min-w-0">

@@ -26,7 +26,7 @@ export function Header({
   });
 
   return (
-    <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+    <header className="h-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-md px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
       {/* Sapaan Personal (Gaya Gambar 1: Welcome back, ...) */}
       <div>
         <div className="flex items-center gap-2">

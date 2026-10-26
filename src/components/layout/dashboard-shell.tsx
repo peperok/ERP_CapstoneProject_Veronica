@@ -54,7 +54,7 @@ export function DashboardShell({
           userRole={userRole}
           onLogout={handleLogout}
         />
-        <main className="flex-1 px-6 py-6 sm:px-8 sm:py-7">
+        <main className="flex-1 px-6 sm:px-8 pt-8 pb-14">
           {children}
         </main>
       </div>
