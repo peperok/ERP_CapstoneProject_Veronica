@@ -141,6 +141,8 @@ export function PesananClientView({
   const [orderToMayar, setOrderToMayar] = useState<PesananItem | null>(null);
   const [isSimulatingMayar, setIsSimulatingMayar] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [realInvoiceUrl, setRealInvoiceUrl] = useState<string | null>(null);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
 
   const openConfirmModal = (order: PesananItem) => {
     setOrderToConfirm(order);
@@ -396,13 +398,36 @@ export function PesananClientView({
   };
 
   // FITUR NILAI TAMBAH #3: MAYAR SANDBOX (Bab 11 PRD)
-  const openMayarModal = (order: PesananItem) => {
+  const openMayarModal = async (order: PesananItem) => {
     setOrderToMayar(order);
     setCopiedLink(false);
+    setRealInvoiceUrl(null);
     setIsMayarOpen(true);
+    setIsGeneratingInvoice(true);
+
+    try {
+      const res = await fetch("/api/mayar/create-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pesananId: order.id }),
+      });
+      const resData = await res.json();
+      if (res.ok && resData.success && resData.invoiceUrl) {
+        setRealInvoiceUrl(resData.invoiceUrl);
+        toast.success(`Invoice resmi Mayar untuk ${order.nomor} berhasil dibuat di server Mayar!`);
+      } else {
+        // Fallback ke tautan format Mayar akun jika terjadi limit/timeout
+        setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
+      }
+    } catch {
+      setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
   };
 
   const getMayarLink = (order: PesananItem | null) => {
+    if (realInvoiceUrl) return realInvoiceUrl;
     if (!order) return "";
     return `https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`;
   };
@@ -1634,7 +1659,14 @@ export function PesananClientView({
 
             {/* Input Link Mayar & Action Buttons */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-900">Tautan Pembayaran (Payment Link):</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-slate-900">Tautan Pembayaran Resmi Mayar:</label>
+                {isGeneratingInvoice && (
+                  <span className="text-[10px] text-violet-600 flex items-center gap-1 font-semibold animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Menghubungkan ke server Mayar...
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-1.5">
                 <input
                   type="text"
@@ -1651,6 +1683,15 @@ export function PesananClientView({
                 >
                   {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                   {copiedLink ? "Tersalin" : "Salin"}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => window.open(getMayarLink(orderToMayar), "_blank")}
+                  className="h-7 px-2 text-xs flex items-center gap-1 font-bold bg-violet-600 hover:bg-violet-700 text-white"
+                  title="Buka Halaman Bayar Mayar"
+                >
+                  <ExternalLink className="w-3 h-3" /> Buka
                 </Button>
               </div>
             </div>
