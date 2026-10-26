@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -84,6 +85,8 @@ export function PembelianClientView({
   const [purchases, setPurchases] = useState<PurchaseItem[]>(initialPurchases);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // State Modal Pengajuan PO Baru (Step 5.1)
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -125,6 +128,12 @@ export function PembelianClientView({
     const matchStatus = statusFilter === "semua" || po.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  const totalPages = Math.ceil(filteredPurchases.length / pageSize);
+  const paginatedPurchases = filteredPurchases.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Auto-generate nomor PO berikutnya (misal PO-00019 -> PO-00020)
   const getNextPONumber = () => {
@@ -473,9 +482,6 @@ export function PembelianClientView({
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Daftar Pembelian (Purchase Order)
           </h2>
-          <p className="text-sm text-slate-500">
-            Kelola alur pengadaan barang ke pemasok, persetujuan harga beli oleh Manajer, dan pencatatan barang tiba di gudang.
-          </p>
         </div>
 
         {/* Tombol Ajukan PO Baru (Staf Gudang & Manajer: BR-09) */}
@@ -546,7 +552,7 @@ export function PembelianClientView({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredPurchases.map((po) => {
+              paginatedPurchases.map((po) => {
                 const totalBiaya =
                   po.harga_beli_satuan && po.jumlah_dipesan
                     ? po.harga_beli_satuan * po.jumlah_dipesan
@@ -690,6 +696,19 @@ export function PembelianClientView({
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={filteredPurchases.length}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* ========================================================================= */}

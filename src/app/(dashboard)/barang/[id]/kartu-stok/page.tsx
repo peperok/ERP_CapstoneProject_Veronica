@@ -61,9 +61,6 @@ export default async function KartuStokPage({ params }: KartuStokPageProps) {
                 {barang.kode}
               </Badge>
             </div>
-            <p className="text-xs text-slate-500">
-              Riwayat lengkap mutasi stok barang (masuk, keluar, batal, penyesuaian opname)
-            </p>
           </div>
         </div>
 

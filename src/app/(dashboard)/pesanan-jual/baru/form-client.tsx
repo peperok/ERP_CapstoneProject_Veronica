@@ -327,9 +327,6 @@ export function FormPesananBaruClient({
               <ShoppingCart className="w-5 h-5 text-blue-600" />
               Buat Draf Pesanan Jual Baru (Sales Order)
             </h1>
-            <p className="text-xs text-slate-600 font-medium">
-              Satu pesanan dapat memuat 1 s/d 20 baris barang tanpa duplikasi item.
-            </p>
           </div>
         </div>
 

@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +73,8 @@ export function PengaturanClientView({
   const [activeTab, setActiveTab] = useState<"audit" | "users">("audit");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAksi, setFilterAksi] = useState("semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Modal Detail Diff Perubahan
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -93,6 +96,12 @@ export function PengaturanClientView({
 
     return matchSearch && matchAksi;
   });
+
+  const totalPages = Math.ceil(filteredLogs.length / pageSize);
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const formatAksiBadge = (aksi: string) => {
     switch (aksi) {
@@ -163,9 +172,6 @@ export function PengaturanClientView({
               Khusus Manajer
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-600 mt-1">
-            Transparansi seluruh riwayat aktivitas sensitif, perubahan status transaksi, dan pengawasan wewenang peran (RBAC).
-          </p>
         </div>
       </div>
 
@@ -248,7 +254,7 @@ export function PengaturanClientView({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredLogs.map((log) => {
+                  paginatedLogs.map((log) => {
                     const timeFormatted = new Date(log.dibuat_pada).toLocaleString("id-ID", {
                       day: "numeric",
                       month: "short",
@@ -298,6 +304,19 @@ export function PengaturanClientView({
                 )}
               </TableBody>
             </Table>
+
+            {/* Pagination Controls */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={filteredLogs.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+            />
           </div>
         </div>
       )}

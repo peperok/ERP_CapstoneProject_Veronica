@@ -204,9 +204,6 @@ export function PemasokClientView({
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Daftar Pemasok (Supplier)
           </h2>
-          <p className="text-sm text-slate-500">
-            Kelola data 4 pemasok utama kebutuhan pokok untuk pengajuan pembelian (PO).
-          </p>
         </div>
 
         {canManage && (

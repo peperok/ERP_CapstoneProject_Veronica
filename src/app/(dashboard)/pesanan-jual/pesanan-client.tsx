@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -110,6 +111,8 @@ export function PesananClientView({
   const [orders, setOrders] = useState<PesananItem[]>(initialOrders);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Modal Detail Items
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -690,7 +693,10 @@ export function PesananClientView({
               border-top: 1px solid #0f172a;
               padding-top: 4px;
               display: inline-block;
-              width: 80%;
+              width: 85%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
             .sign-sub {
               font-size: 10px;
@@ -758,17 +764,17 @@ export function PesananClientView({
           <div class="signatures">
             <div class="sign-col">
               <div class="sign-title">Diserahkan Oleh (Gudang)</div>
-              <div class="sign-line">( ................................ )</div>
-              <div class="sign-sub">Tgl: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+              <div class="sign-line">( ................ )</div>
+              <div class="sign-sub">Tgl: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
             </div>
             <div class="sign-col">
               <div class="sign-title">Dibawa Oleh (Pengemudi/Sopir)</div>
-              <div class="sign-line">( ................................ )</div>
-              <div class="sign-sub">No Pol: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+              <div class="sign-line">( ................ )</div>
+              <div class="sign-sub">No Pol: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
             </div>
             <div class="sign-col">
               <div class="sign-title">Diterima Oleh (Toko / Cap)</div>
-              <div class="sign-line">${order.pelanggan?.nama_toko ? `( ${order.pelanggan.nama_toko} )` : "( ................................ )"}</div>
+              <div class="sign-line">${order.pelanggan?.nama_toko ? `( ${order.pelanggan.nama_toko} )` : "( ................ )"}</div>
               <div class="sign-sub">Tanda Tangan & Cap Toko</div>
             </div>
           </div>
@@ -798,6 +804,12 @@ export function PesananClientView({
     const matchStatus = statusFilter === "semua" || o.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  const totalPages = Math.ceil(filteredOrders.length / pageSize);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Statistik Ringkasan
   const countDraf = orders.filter((o) => o.status === "draf").length;
@@ -858,9 +870,6 @@ export function PesananClientView({
               {filteredOrders.length} Pesanan
             </span>
           </div>
-          <p className="text-sm font-medium text-slate-600 mt-1">
-            Pengelolaan alur penjualan barang, validasi plafon kredit, pengiriman gudang, dan pelunasan faktur.
-          </p>
         </div>
 
         {canCreate && (
@@ -1007,7 +1016,7 @@ export function PesananClientView({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredOrders.map((order) => {
+              paginatedOrders.map((order) => {
                 const itemCount = order.items?.length || 0;
                 return (
                   <TableRow key={order.id} className="hover:bg-slate-50 transition-colors">
@@ -1136,6 +1145,19 @@ export function PesananClientView({
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={filteredOrders.length}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* Modal Detail Items Pesanan */}

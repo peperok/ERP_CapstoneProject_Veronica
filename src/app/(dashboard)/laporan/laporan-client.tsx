@@ -641,9 +641,6 @@ export function LaporanClientView({
               Khusus Manajer
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-600 mt-1">
-            Analisis profitabilitas, tren margin mingguan, kontribusi produk, dan jadwal umur piutang pelanggan.
-          </p>
         </div>
 
         <Button

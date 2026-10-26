@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -67,6 +68,8 @@ export function PelangganClientView({
   const isManajer = userRole === "manajer";
   const [searchTerm, setSearchTerm] = useState("");
   const [pelangganList, setPelangganList] = useState<PelangganItem[]>(initialPelanggan);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Dialog Tambah Pelanggan
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -100,6 +103,12 @@ export function PelangganClientView({
       p.telepon.includes(searchTerm)
     );
   });
+
+  const totalPages = Math.ceil(filteredPelanggan.length / pageSize);
+  const paginatedPelanggan = filteredPelanggan.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Auto generate kode pelanggan berikutnya (PLG-010 -> PLG-011)
   const getNextKodePelanggan = () => {
@@ -279,9 +288,6 @@ export function PelangganClientView({
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Daftar Pelanggan (Toko & Minimarket)
           </h2>
-          <p className="text-sm text-slate-500">
-            Kelola data toko pelanggan, plafon batas kredit tempo, dan pantau status tagihan piutang berjalan.
-          </p>
         </div>
 
         <Button
@@ -328,7 +334,7 @@ export function PelangganClientView({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredPelanggan.map((p) => {
+              paginatedPelanggan.map((p) => {
                 const sisaKredit = p.batas_kredit - p.piutang_berjalan;
                 const kreditOver = p.piutang_berjalan >= p.batas_kredit && p.batas_kredit > 0;
                 const isZeroLimit = p.batas_kredit === 0;
@@ -402,6 +408,19 @@ export function PelangganClientView({
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={filteredPelanggan.length}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* ========================================================================= */}

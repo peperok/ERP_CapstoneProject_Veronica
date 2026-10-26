@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +73,8 @@ export function BarangClientView({
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMenipis, setFilterMenipis] = useState(false);
   const [barangList, setBarangList] = useState<BarangItem[]>(initialBarang);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Dialog Tambah Barang (Khusus Manajer: BR-01)
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -152,6 +155,12 @@ export function BarangClientView({
     }
     return matchSearch;
   });
+
+  const totalPages = Math.ceil(filteredBarang.length / pageSize);
+  const paginatedBarang = filteredBarang.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   // Fungsi pembantu generate kode barang berikutnya (misal: BRG-016 -> BRG-017)
   const getNextKodeBarang = () => {
@@ -425,9 +434,6 @@ export function BarangClientView({
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Katalog Barang & Stok Gudang
           </h2>
-          <p className="text-sm text-slate-500">
-            Pantau stok fisik real-time, batas minimum, dan riwayat kartu mutasi barang.
-          </p>
         </div>
 
         {/* Tombol Tambah Barang (Khusus Manajer: BR-01) */}
@@ -512,7 +518,7 @@ export function BarangClientView({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredBarang.map((b) => {
+              paginatedBarang.map((b) => {
                 const isMenipis = b.stok <= b.stok_minimum;
                 return (
                   <TableRow key={b.id} className="hover:bg-slate-50/80">
@@ -610,6 +616,19 @@ export function BarangClientView({
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={filteredBarang.length}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* ========================================================================= */}

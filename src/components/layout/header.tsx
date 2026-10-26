@@ -38,9 +38,6 @@ export function Header({
             Online
           </span>
         </div>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          Berikut ringkasan operasional distribusi kebutuhan pokok hari ini.
-        </p>
       </div>
 
       {/* Widget Sisi Kanan: Tanggal + Peran Badge + AI Copilot */}
