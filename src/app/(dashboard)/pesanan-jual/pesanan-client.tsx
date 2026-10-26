@@ -404,7 +404,7 @@ export function PesananClientView({
 
   const getMayarLink = (order: PesananItem | null) => {
     if (!order) return "";
-    return `https://sandbox.mayar.id/pay/${order.nomor.toLowerCase()}`;
+    return `https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`;
   };
 
   const handleCopyLink = () => {
