@@ -113,17 +113,20 @@ Kasus batas yang diuji mencakup:
 - [x] Inisialisasi Proyek Next.js App Router, TypeScript, dan Tailwind CSS
 - [x] Instalasi dependensi UI (Lucide React, Radix UI, Sonner Toast, Supabase SSR)
 - [x] Struktur folder modular (`components/ui`, `components/layout`, `app/(auth)`, `app/(dashboard)`, `lib/supabase`, `types`)
-- [x] Dokumentasi `README.md`, `.env.example`, dan `docs/test-plan.md`
-- [ ] Database Schema DDL & Row Level Security (RLS) di Supabase
-- [ ] Stored Procedure / Trigger transaksional atomik (`FOR UPDATE`)
-- [ ] Seeding data master dan riwayat transaksi dari Excel
-- [ ] Halaman Otentikasi & Route Guard berbasis peran
-- [ ] Modul Dashboard khusus untuk ketiga peran
-- [ ] Modul Master Data Barang, Pemasok, dan Pelanggan
-- [ ] Modul Pembelian (Pengajuan, Persetujuan Manajer, dan Penerimaan Gudang)
-- [ ] Modul Pesanan Jual (Draf, Konfirmasi multi-rule, Pengiriman, dan Pelunasan)
-- [ ] Modul Laporan (Grafik Mingguan Omzet & Margin, Aging Piutang, Ekspor CSV)
-- [ ] Modul Pengaturan (Kelola Akun & Audit Log Perubahan Data)
-- [ ] Fitur Nilai Tambah: Cetak Surat Jalan Pengemudi & Sandbox Mayar
-- [ ] Deployment ke Netlify dengan tag `noindex`
-- [ ] Perekaman Video Demo 3-5 Menit untuk Pengumpulan Capstone
+- [x] Dokumentasi `README.md`, `.env.example`, `docs/test-plan.md`, dan `docs/test-report.md`
+- [x] Database Schema DDL & Row Level Security (RLS) di Supabase
+- [x] Stored Procedure / Trigger transaksional atomik (`FOR UPDATE`)
+- [x] Seeding data master dan riwayat transaksi dari Excel (412 baris data lengkap)
+- [x] Halaman Otentikasi & Route Guard berbasis peran (blokir akun nonaktif)
+- [x] Modul Dashboard khusus untuk ketiga peran (Manajer, Sales, Gudang)
+- [x] Modul Master Data Barang, Pemasok, dan Pelanggan
+- [x] Modul Pembelian (Pengajuan, Persetujuan Manajer, dan Penerimaan Gudang)
+- [x] Modul Pesanan Jual (Draf, Konfirmasi multi-rule, Pengiriman, dan Pelunasan)
+- [x] Modul Laporan (Grafik Mingguan Omzet & Margin, Aging Piutang, Ekspor Excel & CSV)
+- [x] Modul Pengaturan (Kelola Akun & Audit Log Perubahan Data Sensitif)
+- [x] Fitur Nilai Tambah #1: Cetak Surat Jalan Pengemudi (Delivery Order tanpa harga)
+- [x] Fitur Nilai Tambah #2: Notifikasi Email Stok Menipis via Resend API
+- [x] Fitur Nilai Tambah #3: Tautan Bayar & QRIS Real Mayar Sandbox + WhatsApp Dispatcher
+- [x] Pengujian 20 Test Case Aturan Bisnis (100% PASSED di `docs/test-report.md`)
+- [x] Deployment ke Netlify dengan tag `noindex` dan HTTP Security Headers
+- [ ] Perekaman Video Demo 3-5 Menit untuk Pengumpulan Capstone LMS
