@@ -416,10 +416,12 @@ export function PesananClientView({
         setRealInvoiceUrl(resData.invoiceUrl);
         toast.success(`Invoice resmi Mayar untuk ${order.nomor} berhasil dibuat di server Mayar!`);
       } else {
+        toast.error(resData.message || "Gagal membuat invoice real Mayar.");
         // Fallback ke tautan format Mayar akun jika terjadi limit/timeout
         setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
       }
-    } catch {
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menghubungi server Mayar.");
       setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
     } finally {
       setIsGeneratingInvoice(false);
