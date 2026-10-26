@@ -411,7 +411,14 @@ export function PesananClientView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pesananId: order.id }),
       });
-      const resData = await res.json();
+      
+      let resData: any = {};
+      try {
+        resData = await res.json();
+      } catch {
+        resData = { message: `Server HTTP ${res.status}: ${res.statusText}` };
+      }
+
       if (res.ok && resData.success && resData.invoiceUrl) {
         setRealInvoiceUrl(resData.invoiceUrl);
         toast.success(`Invoice resmi Mayar untuk ${order.nomor} berhasil dibuat di server Mayar!`);
@@ -421,7 +428,7 @@ export function PesananClientView({
         setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
       }
     } catch (err: any) {
-      toast.error(err.message || "Gagal menghubungi server Mayar.");
+      toast.error(`Koneksi API Mayar: ${err.message}`);
       setRealInvoiceUrl(`https://takechanceveve.mayar.link/${order.nomor.toLowerCase()}`);
     } finally {
       setIsGeneratingInvoice(false);
