@@ -155,10 +155,10 @@ Dokumen ini mendokumentasikan hasil eksekusi pengujian komprehensif terhadap **2
 
 - **Pelaku**: Staf Penjualan (`rina@sinarabadi.test`)
 - **Tindakan**: Rina mencoba mengonfirmasi pesanan draf `SO-00044` yang memuat item Gula Pasir dengan diskon 10% sehingga harga jual satuan menjadi Rp325.800 (di bawah HPP Rp341.000).
-- **Hasil yang Diharapkan**: Konfirmasi ditolak dengan pesan: *"Harga di bawah harga pokok hanya boleh disetujui Manajer"*.
+- **Hasil yang Diharapkan**: Konfirmasi ditolak dengan pesan: *"Harga di bawah batas, minta persetujuan Manajer"*.
 - **Hasil Aktual**:
   - Stored Procedure `konfirmasi_pesanan_jual` memeriksa kondisi `subtotal < (harga_pokok * jumlah)`.
-  - Karena pelaku berstatus peran `penjualan`, transaksi ditolak dengan pesan: `"Harga di bawah harga pokok hanya boleh disetujui Manajer."`
+  - Karena pelaku berstatus peran `penjualan`, transaksi ditolak dengan pesan standar PRD: `"Harga di bawah batas, minta persetujuan Manajer."`
 - **Verdict**: **PASSED ✅**
 
 #### 12. TC-08: Persetujuan pesanan di bawah harga pokok oleh Manajer (BR-04)
