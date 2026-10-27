@@ -73,6 +73,7 @@ export function PengaturanClientView({
   const [activeTab, setActiveTab] = useState<"audit" | "users">("audit");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAksi, setFilterAksi] = useState("semua");
+  const [filterDate, setFilterDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -85,7 +86,7 @@ export function PengaturanClientView({
     setIsDetailOpen(true);
   };
 
-  // Filter audit log
+  // Filter audit log (Aksi, Keyword, Tanggal)
   const filteredLogs = initialLogs.filter((log) => {
     const matchSearch =
       log.aksi.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,7 +95,11 @@ export function PengaturanClientView({
 
     const matchAksi = filterAksi === "semua" || log.aksi === filterAksi;
 
-    return matchSearch && matchAksi;
+    const matchDate =
+      !filterDate ||
+      (log.dibuat_pada && log.dibuat_pada.startsWith(filterDate));
+
+    return matchSearch && matchAksi && matchDate;
   });
 
   const totalPages = Math.ceil(filteredLogs.length / pageSize);
@@ -216,7 +221,17 @@ export function PengaturanClientView({
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Filter Tanggal */}
+              <Input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                aria-label="Filter tanggal audit"
+                className="h-9 w-36 bg-slate-50 border-slate-300 text-xs font-bold text-slate-900"
+              />
+
+              {/* Filter Jenis Aksi (Semua aksi yang diwajibkan PRD BR-12) */}
               <select
                 value={filterAksi}
                 onChange={(e) => setFilterAksi(e.target.value)}
@@ -224,11 +239,31 @@ export function PengaturanClientView({
                 className="h-9 rounded-md border border-slate-300 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer"
               >
                 <option value="semua">Semua Jenis Aksi</option>
-                <option value="batal_pesanan_dikonfirmasi">Batal Pesanan Dikonfirmasi</option>
+                <option value="ubah_harga_jual">Ubah Harga Jual</option>
+                <option value="ubah_batas_kredit">Ubah Batas Kredit</option>
+                <option value="setujui_pembelian">Setujui Pembelian PO</option>
                 <option value="tolak_pembelian">Tolak Pembelian PO</option>
-                <option value="kirim_pesanan">Kirim Pesanan</option>
+                <option value="batal_pesanan_dikonfirmasi">Batal Pesanan Dikonfirmasi</option>
+                <option value="penyesuaian_stok">Penyesuaian Stok Opname</option>
                 <option value="lunas_pesanan">Pelunasan Pesanan</option>
+                <option value="kirim_pesanan">Kirim Pesanan</option>
+                <option value="terima_barang">Terima Barang PO</option>
+                <option value="pelunasan_mayar_sandbox">Pelunasan Mayar Sandbox</option>
               </select>
+
+              {(filterAksi !== "semua" || filterDate) && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setFilterAksi("semua");
+                    setFilterDate("");
+                  }}
+                  className="h-9 px-2 text-xs font-bold text-slate-500 hover:text-slate-800"
+                >
+                  Reset
+                </Button>
+              )}
             </div>
           </div>
 

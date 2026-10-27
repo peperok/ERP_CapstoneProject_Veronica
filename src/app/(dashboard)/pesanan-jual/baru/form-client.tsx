@@ -503,24 +503,11 @@ export function FormPesananBaruClient({
                         />
                       </td>
 
-                      {/* Harga Satuan */}
+                      {/* Harga Satuan (PRD BR-03: Selalu diambil dari harga jual barang, tidak bisa diketik manual) */}
                       <td className="py-2.5 px-3 text-right">
-                        {isManajer ? (
-                          <Input
-                            type="number"
-                            required
-                            min="1"
-                            value={row.harga_satuan || ""}
-                            onChange={(e) =>
-                              handleRowChange(row.id, "harga_satuan", Number(e.target.value))
-                            }
-                            className="h-9 font-bold text-slate-900 text-right"
-                          />
-                        ) : (
-                          <div className="h-9 px-2 bg-slate-50 border border-slate-200 rounded flex items-center justify-end font-bold text-slate-900">
-                            {formatRupiah(row.harga_satuan)}
-                          </div>
-                        )}
+                        <div className="h-9 px-2 bg-slate-50 border border-slate-200 rounded flex items-center justify-end font-bold text-slate-900">
+                          {formatRupiah(row.harga_satuan)}
+                        </div>
                       </td>
 
                       {/* Diskon Persen (0 - 10% / 25%) */}

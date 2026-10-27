@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -198,12 +199,23 @@ export function PemasokClientView({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header & Tab Navigasi (PRD Bab 7) */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Daftar Pemasok (Supplier)
+            Daftar Mitra Pemasok (Supplier)
           </h2>
+          <div className="flex items-center gap-2 mt-2">
+            <Link
+              href="/pembelian"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent transition-colors"
+            >
+              Dokumen Pembelian (PO)
+            </Link>
+            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              Data Mitra Pemasok
+            </span>
+          </div>
         </div>
 
         {canManage && (

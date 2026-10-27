@@ -48,6 +48,7 @@ export default async function DashboardPage() {
   let poMenungguList: any[] = [];
   let soDistribution = { draf: 0, dikonfirmasi: 0, dikirim: 0, lunas: 0, dibatalkan: 0 };
   let recentOrdersList: any[] = [];
+  let weeklyDashboardData: { label: string; omzet: number; margin: number }[] = [];
 
   // Data Query Khusus Penjualan
   let myOrdersCount = { draf: 0, dikonfirmasi: 0, dikirim: 0, lunas: 0 };
@@ -127,6 +128,58 @@ export default async function DashboardPage() {
     if (poData) {
       poMenungguCount = poData.length;
       poMenungguList = poData.slice(0, 5);
+    }
+
+    // Kalkulasi Grafik Omzet & Margin 8 Minggu Terakhir (PRD Bab 7 & Bab 9)
+    const { data: weeklyOrders } = await supabase
+      .from("pesanan_jual")
+      .select(`
+        id,
+        total,
+        status,
+        dikirim_pada,
+        dibuat_pada,
+        items:item_pesanan_jual (
+          jumlah,
+          hpp_satuan
+        )
+      `)
+      .in("status", ["dikirim", "lunas"]);
+
+    if (weeklyOrders) {
+      const weeksInit: { [key: string]: { label: string; omzet: number; margin: number } } = {
+        "W-1": { label: "1-7 Sep", omzet: 0, margin: 0 },
+        "W-2": { label: "8-14 Sep", omzet: 0, margin: 0 },
+        "W-3": { label: "15-21 Sep", omzet: 0, margin: 0 },
+        "W-4": { label: "22-28 Sep", omzet: 0, margin: 0 },
+        "W-5": { label: "29 Sep-5 Okt", omzet: 0, margin: 0 },
+        "W-6": { label: "6-12 Okt", omzet: 0, margin: 0 },
+        "W-7": { label: "13-19 Okt", omzet: 0, margin: 0 },
+        "W-8": { label: "20-26 Okt", omzet: 0, margin: 0 },
+      };
+
+      const startDate = new Date("2026-09-01T00:00:00Z");
+      weeklyOrders.forEach((o: any) => {
+        const orderDateStr = o.dikirim_pada || o.dibuat_pada;
+        if (orderDateStr) {
+          const oDate = new Date(orderDateStr);
+          const diffDays = Math.floor(
+            (oDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          const weekIndex = Math.min(7, Math.max(0, Math.floor(diffDays / 7)));
+          const weekKey = `W-${weekIndex + 1}`;
+          if (weeksInit[weekKey]) {
+            const tot = Number(o.total) || 0;
+            weeksInit[weekKey].omzet += tot;
+            let hppTot = 0;
+            (o.items || []).forEach((it: any) => {
+              hppTot += (Number(it.hpp_satuan) || 0) * (Number(it.jumlah) || 0);
+            });
+            weeksInit[weekKey].margin += tot - hppTot;
+          }
+        }
+      });
+      weeklyDashboardData = Object.values(weeksInit);
     }
   } else if (role === "penjualan") {
     // Pesanan milik staf penjualan saat ini
@@ -504,6 +557,72 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* BARIS 3: GRAFIK TREN OMZET & MARGIN 8 MINGGU TERAKHIR (PRD Bab 7 & Bab 9 / BUG-7) */}
+          {weeklyDashboardData.length > 0 && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm tracking-tight flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-blue-600" />
+                    Tren Omzet Mingguan & Laba Kotor (8 Minggu Terakhir)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Perbandingan mingguan performa penjualan dan perolehan margin kotor CV Sinar Abadi Niaga
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-blue-600 inline-block" />
+                    <span className="text-slate-700">Omzet</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-emerald-500 inline-block" />
+                    <span className="text-slate-700">Laba Kotor</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart Visual Bars */}
+              {(() => {
+                const maxVal = Math.max(...weeklyDashboardData.map((w) => w.omzet), 1);
+                return (
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 pt-5 pb-2 items-end min-h-[220px] border-b border-slate-100">
+                    {weeklyDashboardData.map((week, idx) => {
+                      const omzetHeight = Math.max(6, Math.round((week.omzet / maxVal) * 150));
+                      const marginHeight = Math.max(4, Math.round((Math.max(0, week.margin) / maxVal) * 150));
+                      const pct = week.omzet > 0 ? ((week.margin / week.omzet) * 100).toFixed(0) : "0";
+
+                      return (
+                        <div key={idx} className="flex flex-col items-center gap-1.5 group">
+                          <span className="text-[10px] font-black text-emerald-700 opacity-80 group-hover:opacity-100">
+                            {pct}%
+                          </span>
+                          <div className="w-full flex items-end justify-center gap-1 h-[155px]">
+                            {/* Batang Omzet */}
+                            <div
+                              style={{ height: `${omzetHeight}px` }}
+                              className="w-1/2 max-w-[24px] bg-blue-600 rounded-t-md transition-all group-hover:bg-blue-700"
+                              title={`Omzet: ${formatRupiah(week.omzet)}`}
+                            />
+                            {/* Batang Margin */}
+                            <div
+                              style={{ height: `${marginHeight}px` }}
+                              className="w-1/2 max-w-[24px] bg-emerald-500 rounded-t-md transition-all group-hover:bg-emerald-600"
+                              title={`Laba Kotor: ${formatRupiah(week.margin)}`}
+                            />
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-600 text-center line-clamp-1">
+                            {week.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </>
       )}
 

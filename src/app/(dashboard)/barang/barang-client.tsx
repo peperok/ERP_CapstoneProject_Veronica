@@ -112,7 +112,9 @@ export function BarangClientView({
   const [targetEmail, setTargetEmail] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-  const lowStockItems = barangList.filter((b) => Number(b.stok) <= Number(b.stok_minimum));
+  const lowStockItems = barangList.filter(
+    (b) => b.aktif && Number(b.stok) <= Number(b.stok_minimum)
+  );
 
   const handleSendLowStockEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +151,7 @@ export function BarangClientView({
     const matchSearch =
       b.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.kode.toLowerCase().includes(searchTerm.toLowerCase());
-    const isMenipis = b.stok <= b.stok_minimum;
+    const isMenipis = b.aktif && b.stok <= b.stok_minimum;
     if (filterMenipis) {
       return matchSearch && isMenipis;
     }

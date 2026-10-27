@@ -171,7 +171,12 @@ export function PesananClientView({
 
       if (data && typeof data === "object") {
         if (!data.success) {
-          toast.error(data.message || "Gagal mengonfirmasi pesanan.");
+          let errorMsg = data.message || "Gagal mengonfirmasi pesanan.";
+          // Selaraskan teks penolakan BR-04 persis sesuai PRD
+          if (errorMsg.includes("bawah harga pokok") || errorMsg.includes("bawah batas")) {
+            errorMsg = "Harga di bawah batas, minta persetujuan Manajer.";
+          }
+          toast.error(errorMsg);
           setIsConfirming(false);
           return;
         }
@@ -400,8 +405,12 @@ export function PesananClientView({
     }
   };
 
-  // FITUR NILAI TAMBAH #3: MAYAR SANDBOX (Bab 11 PRD)
+  // FITUR NILAI TAMBAH #3: MAYAR SANDBOX (Bab 11 PRD & BR-07: Pelunasan hanya Manajer)
   const openMayarModal = async (order: PesananItem) => {
+    if (!isManajer) {
+      toast.error("Hanya Manajer yang berwenang mengakses tagihan dan pelunasan Mayar.");
+      return;
+    }
     setOrderToMayar(order);
     setCopiedLink(false);
     setRealInvoiceUrl(null);
@@ -478,6 +487,10 @@ export function PesananClientView({
   // Simulasi Pelunasan Instan via Mayar Webhook (payment.received)
   const handleSimulateMayarPayment = async () => {
     if (!orderToMayar) return;
+    if (!isManajer) {
+      toast.error("Hanya Manajer yang berwenang memproses pelunasan.");
+      return;
+    }
 
     setIsSimulatingMayar(true);
     try {
@@ -1057,8 +1070,8 @@ export function PesananClientView({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {/* AKSI 1: Konfirmasi Pesanan (Draf -> Dikonfirmasi) */}
-                        {order.status === "draf" && canCreate && (
+                        {/* AKSI 1: Konfirmasi Pesanan (Draf -> Dikonfirmasi: BR-07 Staf Penjualan hanya draf miliknya, Manajer semua) */}
+                        {order.status === "draf" && (isManajer || order.dibuat_oleh === currentUserId) && (
                           <Button
                             size="sm"
                             onClick={() => openConfirmModal(order)}
@@ -1090,8 +1103,8 @@ export function PesananClientView({
                           </Button>
                         )}
 
-                        {/* Fitur Nilai Tambah #3: Tautan Bayar Mayar & QRIS (Bab 11 PRD) */}
-                        {order.status === "dikirim" && (
+                        {/* Fitur Nilai Tambah #3: Tautan Bayar Mayar & QRIS (Bab 11 PRD & BR-07: Pelunasan hanya Manajer) */}
+                        {order.status === "dikirim" && isManajer && (
                           <Button
                             size="sm"
                             onClick={() => openMayarModal(order)}
@@ -1266,7 +1279,7 @@ export function PesananClientView({
                 </Button>
               )}
 
-              {selectedOrder && selectedOrder.status === "dikirim" && (
+              {selectedOrder && selectedOrder.status === "dikirim" && isManajer && (
                 <Button
                   type="button"
                   size="sm"

@@ -113,6 +113,9 @@ export default async function KartuStokPage({ params }: KartuStokPageProps) {
                   prefix = "=";
                 }
 
+                const absQty = Math.abs(Number(m.jumlah) || 0);
+                const displaySign = Number(m.jumlah) > 0 ? "+" : Number(m.jumlah) < 0 ? "-" : "";
+
                 return (
                   <TableRow key={m.id} className="text-xs hover:bg-slate-50">
                     <TableCell className="text-slate-600 whitespace-nowrap">
@@ -129,15 +132,15 @@ export default async function KartuStokPage({ params }: KartuStokPageProps) {
                     <TableCell className="text-right font-mono font-bold">
                       <span
                         className={
-                          prefix === "+"
+                          m.jenis === "masuk" || m.jenis === "batal" || displaySign === "+"
                             ? "text-emerald-600"
-                            : prefix === "-"
+                            : m.jenis === "keluar" || displaySign === "-"
                             ? "text-red-600"
                             : "text-amber-600"
                         }
                       >
-                        {prefix}
-                        {m.jumlah} {barang.satuan}
+                        {m.jenis === "penyesuaian" ? (displaySign ? `${displaySign}${absQty}` : `${absQty}`) : `${prefix}${absQty}`}{" "}
+                        {barang.satuan}
                       </span>
                     </TableCell>
                     <TableCell className="text-center font-bold text-slate-900">

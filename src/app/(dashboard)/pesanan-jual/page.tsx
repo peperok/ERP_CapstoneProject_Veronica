@@ -52,7 +52,9 @@ export default async function PesananJualPage() {
     .order("dibuat_pada", { ascending: false });
 
   if (userRole === "gudang") {
-    query = query.neq("status", "draf");
+    // PRD Bab 7: "Gudang hanya melihat pesanan dikonfirmasi ke atas" (dikonfirmasi, dikirim, lunas)
+    // dan pesanan dibatalkan hanya jika pernah dikonfirmasi (tanggal_konfirmasi tidak null)
+    query = query.in("status", ["dikonfirmasi", "dikirim", "lunas"]);
   }
 
   const { data: rawOrders } = await query;

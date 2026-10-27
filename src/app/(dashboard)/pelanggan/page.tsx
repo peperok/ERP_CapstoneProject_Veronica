@@ -18,6 +18,14 @@ export default async function PelangganPage() {
     .eq("id", user.id)
     .single();
 
+  const userRole = profile?.peran as "manajer" | "penjualan" | "gudang";
+
+  // Staf Gudang DILARANG mengakses modul pelanggan (PRD Bab 7 & TC-10)
+  if (userRole === "gudang") {
+    const { redirect } = await import("next/navigation");
+    redirect("/");
+  }
+
   // Ambil daftar pelanggan
   const { data: pelangganList } = await supabase
     .from("pelanggan")

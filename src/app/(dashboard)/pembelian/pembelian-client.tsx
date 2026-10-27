@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -476,12 +477,25 @@ export function PembelianClientView({
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman */}
+      {/* Header Halaman & Tab Navigasi (PRD Bab 7: Data pemasok di tab terpisah) */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Daftar Pembelian (Purchase Order)
           </h2>
+          {/* Tab Navigasi Pembelian vs Pemasok */}
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              Dokumen Pembelian (PO)
+            </span>
+            <Link
+              href="/pemasok"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent transition-colors"
+            >
+              <Building2 className="w-3.5 h-3.5 text-slate-500" />
+              Data Mitra Pemasok
+            </Link>
+          </div>
         </div>
 
         {/* Tombol Ajukan PO Baru (Staf Gudang & Manajer: BR-09) */}

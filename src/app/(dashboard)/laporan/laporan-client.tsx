@@ -116,8 +116,8 @@ export function LaporanClientView({
           });
         }
 
-        // Piutang aktif dihitung dari pesanan yang berstatus 'dikirim' (belum lunas)
-        if (o.status === "dikirim") {
+        // Piutang berjalan sesuai PRD BR-05: pesanan berstatus dikonfirmasi atau dikirim
+        if (o.status === "dikirim" || o.status === "dikonfirmasi") {
           piutang += o.total;
         }
       });
@@ -229,16 +229,57 @@ export function LaporanClientView({
       }
     });
 
-    return Object.values(barangMap)
-      .sort((a, b) => b.margin - a.margin)
-      .slice(0, 10);
+    const sortedAll = Object.values(barangMap).sort((a, b) => b.margin - a.margin);
+    return sortedAll.slice(0, 10);
+  }, [orders]);
+
+  // Kalkulasi 5 Barang Margin Terkecil (PRD §9.3 & BUG-7)
+  const bottomBarangData = useMemo(() => {
+    const barangMap: {
+      [key: string]: {
+        kode: string;
+        nama: string;
+        satuan: string;
+        qty: number;
+        omzet: number;
+        hpp: number;
+        margin: number;
+      };
+    } = {};
+
+    orders.forEach((o) => {
+      if (o.status === "dikirim" || o.status === "lunas") {
+        o.items?.forEach((item) => {
+          const bId = item.barang_id;
+          if (!barangMap[bId]) {
+            barangMap[bId] = {
+              kode: item.barang?.kode || "BRG-???",
+              nama: item.barang?.nama || "Barang",
+              satuan: item.barang?.satuan || "unit",
+              qty: 0,
+              omzet: 0,
+              hpp: 0,
+              margin: 0,
+            };
+          }
+          const itemHppTotal = (item.hpp_satuan || 0) * item.jumlah;
+          barangMap[bId].qty += item.jumlah;
+          barangMap[bId].omzet += item.subtotal;
+          barangMap[bId].hpp += itemHppTotal;
+          barangMap[bId].margin += item.subtotal - itemHppTotal;
+        });
+      }
+    });
+
+    const sortedAsc = Object.values(barangMap).sort((a, b) => a.margin - b.margin);
+    return sortedAsc.slice(0, 5);
   }, [orders]);
 
   // ============================================================================
   // 4. KALKULASI AGING SCHEDULE PIUTANG (UMUR PIUTANG PELANGGAN)
   // ============================================================================
   const agingData = useMemo(() => {
-    const today = new Date("2026-10-23T00:00:00Z");
+    const today = new Date();
 
     return pelangganList.map((p) => {
       // Cari semua pesanan toko ini yang berstatus 'dikirim' (belum lunas)
@@ -853,6 +894,62 @@ export function LaporanClientView({
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="inline-flex px-2 py-0.5 rounded text-xs font-black bg-emerald-100 text-emerald-800">
+                        {marginPct.toFixed(1)}%
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          {/* Tabel 5 Barang Margin Terkecil (PRD §9.3 & BUG-7) */}
+          <div className="p-4 border-t border-slate-200 bg-amber-50/50">
+            <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              5 Barang dengan Margin Keuntungan Terkecil (Perlu Evaluasi Harga Jual)
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+              Daftar barang dengan laba kotor terendah atau tipis, memerlukan penyesuaian diskon atau harga jual.
+            </p>
+          </div>
+
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead className="font-bold text-slate-900 text-xs w-12 text-center">No</TableHead>
+                <TableHead className="font-bold text-slate-900 text-xs">Kode & Nama Barang</TableHead>
+                <TableHead className="font-bold text-slate-900 text-xs text-center">Volume Terjual</TableHead>
+                <TableHead className="font-bold text-slate-900 text-xs text-right">Total Omzet</TableHead>
+                <TableHead className="font-bold text-slate-900 text-xs text-right">Total Laba Kotor (Margin)</TableHead>
+                <TableHead className="font-bold text-slate-900 text-xs text-center">Margin %</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bottomBarangData.map((b, idx) => {
+                const marginPct = b.omzet > 0 ? (b.margin / b.omzet) * 100 : 0;
+                return (
+                  <TableRow key={idx} className="hover:bg-slate-50">
+                    <TableCell className="text-center font-bold text-slate-500 text-xs">
+                      #{idx + 1}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-bold text-xs text-slate-900">{b.nama}</div>
+                      <div className="text-[11px] font-medium text-slate-500">{b.kode}</div>
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-xs text-slate-800">
+                      {b.qty} {b.satuan}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-xs text-slate-800">
+                      {formatRupiah(b.omzet)}
+                    </TableCell>
+                    <TableCell className={`text-right font-black text-xs ${b.margin <= 0 ? "text-rose-600" : "text-amber-700"}`}>
+                      {formatRupiah(b.margin)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-black ${
+                        marginPct <= 0 ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"
+                      }`}>
                         {marginPct.toFixed(1)}%
                       </span>
                     </TableCell>
