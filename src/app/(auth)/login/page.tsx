@@ -257,7 +257,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-yellow-400 shrink-0" />
             <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              Login Demo Cepat — Penguji & Juri
+              Login Demo Cepat 
             </p>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
